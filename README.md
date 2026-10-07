@@ -18,7 +18,7 @@ pnpm dev                        # api :3000 (Swagger at /api/docs), web :5173
 Open `http://localhost:5173`, pick a mock user in the Dev Toolbar. Each browser tab keeps its own identity,
 so open several tabs to play organizer and participants at the same time.
 
-Other scripts: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`.
+Other scripts: `pnpm build`, `pnpm build:api`, `pnpm build:web`, `pnpm test`, `pnpm lint`, `pnpm typecheck`.
 
 ## LINE setup
 
@@ -34,6 +34,48 @@ Other scripts: `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`.
 
 `docker compose up --build` runs db, api (`prisma migrate deploy` on start) and web (nginx). The API refuses to
 boot if `DEV_AUTH_ENABLED=true` with `NODE_ENV=production`.
+
+## Deploy
+
+The API is configured for Railway and the LIFF web app is configured for Cloudflare Pages.
+
+### Railway API
+
+1. Create a Railway project with a PostgreSQL service and an API service linked to this repository.
+2. Set the API service root directory to `/` and deploy. `railway.json` selects `apps/api/Dockerfile`.
+3. Set these API variables in Railway:
+   `DATABASE_URL`, `JWT_SECRET`, `LINE_LOGIN_CHANNEL_ID`, `LINE_CHANNEL_ACCESS_TOKEN`,
+   `LINE_CHANNEL_SECRET`, `LIFF_ID`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
+4. Set `PORT` only if needed; Railway supplies it automatically. The container runs Prisma migrations before starting.
+5. Add the Railway public API URL to `CORS_ORIGINS` and use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
+
+From a logged-in Railway CLI:
+
+```bash
+pnpm deploy:railway
+```
+
+The API health check is `GET /api/health`.
+
+### Cloudflare Pages web app
+
+Create a Pages project connected to this repository with:
+
+- Build command: `pnpm build:web`
+- Build output directory: `apps/web/dist`
+- Root directory: `/`
+- Environment variable: `VITE_API_URL=https://<api-domain>/api`
+- Environment variable: `VITE_LIFF_ID=<your-liff-id>`
+
+The included `apps/web/public/_redirects` keeps React Router routes working on refresh. To deploy from the
+Cloudflare CLI, authenticate with `pnpm dlx wrangler login`, set `CLOUDFLARE_PROJECT_NAME` if needed, then run:
+
+```bash
+pnpm deploy:cloudflare
+```
+
+After both services are deployed, set the LIFF endpoint URL to the Cloudflare Pages domain and update
+`APP_BASE_URL` and `CORS_ORIGINS` on Railway to that same URL.
 
 ## Structure
 

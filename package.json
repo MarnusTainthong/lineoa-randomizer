@@ -9,6 +9,7 @@
     "dev:web": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/web dev",
     "build": "pnpm -r build",
     "build:api": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/api build",
+    "build:web": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/web build",
     "start:api": "pnpm --filter @line-oa-randomizer/api db:deploy && pnpm --filter @line-oa-randomizer/api start",
     "test": "pnpm -r test",
     "lint": "eslint .",
