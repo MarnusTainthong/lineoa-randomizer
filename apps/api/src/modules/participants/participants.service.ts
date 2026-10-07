@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import { DIRECTED_RULE_TYPES, EVENT_STATUS, type ParticipantView } from '@secret-santa/shared';
+import { DIRECTED_RULE_TYPES, EVENT_STATUS, type ParticipantView } from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';

@@ -1,4 +1,4 @@
-import type { ParticipantView } from '@secret-santa/shared';
+import type { ParticipantView } from '@line-oa-randomizer/shared';
 import { Chip } from '../../components/ui/chip';
 import { IconButton } from '../../components/ui/button';
 import { TH } from '../../lib/th';

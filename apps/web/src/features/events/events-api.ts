@@ -4,7 +4,7 @@ import type {
   EventSummary,
   InvitePreview,
   ParticipantView,
-} from '@secret-santa/shared';
+} from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
 export interface EventFormValues {

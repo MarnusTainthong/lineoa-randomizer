@@ -1,4 +1,4 @@
-import { MIN_PARTICIPANTS_TO_DRAW } from '@secret-santa/shared';
+import { MIN_PARTICIPANTS_TO_DRAW } from '@line-oa-randomizer/shared';
 import { buildAllowedReceiverIdsByGiverId } from './build-allowed-matrix';
 import { explainInfeasibility } from './explain-infeasibility';
 import { findMaximumMatching } from './find-perfect-matching';
@@ -64,7 +64,7 @@ function shuffleAllowedReceivers(allowedReceiverIdsByGiverId: AllowedReceiverIds
 }
 
 /**
- * Finds a random valid Secret Santa assignment: everyone gives once, receives once,
+ * Finds a random valid LINE OA Randomizer assignment: everyone gives once, receives once,
  * never draws themselves, and respects all rules.
  *
  * Never throws for infeasible input; returns `{ isSuccessful: false, reason }` instead.
@@ -105,7 +105,7 @@ export function findAssignments(participants: DrawParticipant[], rules: DrawRule
   return { isSuccessful: true, assignments };
 }
 
-export class SecretSantaStrategy implements DrawStrategy {
+export class RandomDrawStrategy implements DrawStrategy {
   assign(participants: DrawParticipant[], rules: DrawRule[]): DrawResult {
     return findAssignments(participants, rules);
   }

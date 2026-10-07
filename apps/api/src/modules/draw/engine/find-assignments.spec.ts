@@ -1,4 +1,4 @@
-import { RULE_TYPE } from '@secret-santa/shared';
+import { RULE_TYPE } from '@line-oa-randomizer/shared';
 import { checkFeasibility } from './check-feasibility';
 import { findAssignments } from './find-assignments';
 import type { DrawAssignment, DrawParticipant, DrawRule } from './types';

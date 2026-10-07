@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EVENT_STATUS, type AuthResponse, type MockUserView } from '@secret-santa/shared';
+import { EVENT_STATUS, type AuthResponse, type MockUserView } from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';

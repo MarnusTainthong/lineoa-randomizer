@@ -2,9 +2,9 @@ FROM node:22-alpine AS build
 RUN corepack enable
 WORKDIR /repo
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @secret-santa/api... \
- && pnpm --filter @secret-santa/shared build \
- && pnpm --filter @secret-santa/api build
+RUN pnpm install --frozen-lockfile --filter @line-oa-randomizer/api... \
+ && pnpm --filter @line-oa-randomizer/shared build \
+ && pnpm --filter @line-oa-randomizer/api build
 
 FROM node:22-alpine
 RUN corepack enable

@@ -1,7 +1,7 @@
-import type { AuthResponse, MockUserView } from '@secret-santa/shared';
+import type { AuthResponse, MockUserView } from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
-export const DEV_IDENTITY_STORAGE_KEY = 'secret-santa.dev-identity';
+export const DEV_IDENTITY_STORAGE_KEY = 'line-oa-randomizer.dev-identity';
 export const REAL_ACCOUNT_IDENTITY = 'real';
 
 export const devApi = {

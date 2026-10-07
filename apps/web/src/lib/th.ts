@@ -1,6 +1,6 @@
 /** All end-user copy lives here (Thai). Short, direct, casual. */
 export const TH = {
-  appName: 'Secret Santa',
+  appName: 'LINE OA Randomizer',
   nav: { results: 'ดูผลการสุ่ม', manage: 'จัดการการสุ่ม' },
   common: {
     loading: 'กำลังโหลด…',

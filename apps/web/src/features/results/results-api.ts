@@ -1,4 +1,4 @@
-import type { MyResult, ResultHistoryEntry, RoundResults } from '@secret-santa/shared';
+import type { MyResult, ResultHistoryEntry, RoundResults } from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
 const versionQuery = (version?: number) => (version ? `?version=${version}` : '');

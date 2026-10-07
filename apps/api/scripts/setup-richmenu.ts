@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   const { richMenuId } = await client.createRichMenu({
     size: { width: 2500, height: 843 },
     selected: true,
-    name: 'secret-santa-main',
+    name: 'line-oa-randomizer-main',
     chatBarText: 'เมนู',
     areas: [
       {

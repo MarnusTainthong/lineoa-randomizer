@@ -7,7 +7,7 @@ import {
   type EventSummary,
   type InvitePreview,
   type ParticipantView,
-} from '@secret-santa/shared';
+} from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';

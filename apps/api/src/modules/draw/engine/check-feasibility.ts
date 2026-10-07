@@ -1,4 +1,4 @@
-import { FEASIBILITY, MIN_PARTICIPANTS_TO_DRAW, type Feasibility } from '@secret-santa/shared';
+import { FEASIBILITY, MIN_PARTICIPANTS_TO_DRAW, type Feasibility } from '@line-oa-randomizer/shared';
 import { buildAllowedReceiverIdsByGiverId } from './build-allowed-matrix';
 import { explainInfeasibility } from './explain-infeasibility';
 import { findMaximumMatching } from './find-perfect-matching';

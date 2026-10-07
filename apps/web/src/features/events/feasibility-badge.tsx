@@ -1,4 +1,4 @@
-import type { EventDetail } from '@secret-santa/shared';
+import type { EventDetail } from '@line-oa-randomizer/shared';
 import { Chip } from '../../components/ui/chip';
 import { TH } from '../../lib/th';
 

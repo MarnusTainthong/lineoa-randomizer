@@ -1,4 +1,4 @@
-import { RULE_TYPE } from '@secret-santa/shared';
+import { RULE_TYPE } from '@line-oa-randomizer/shared';
 import type { DrawParticipant, DrawRule } from './types';
 
 /** Directed pairs "giver must not draw receiver" produced by the rules. */

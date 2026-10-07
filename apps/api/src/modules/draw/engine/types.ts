@@ -1,4 +1,4 @@
-import type { RuleType } from '@secret-santa/shared';
+import type { RuleType } from '@line-oa-randomizer/shared';
 
 export interface DrawParticipant {
   id: string;

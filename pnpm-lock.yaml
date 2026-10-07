@@ -62,7 +62,7 @@ importers:
       '@prisma/client':
         specifier: ^6.0.0
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
-      '@secret-santa/shared':
+      '@line-oa-randomizer/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       class-transformer:
@@ -123,7 +123,7 @@ importers:
       '@line/liff':
         specifier: ^2.24.0
         version: 2.31.1(supports-color@8.1.1)
-      '@secret-santa/shared':
+      '@line-oa-randomizer/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@tanstack/react-query':

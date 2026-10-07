@@ -5,7 +5,7 @@ import {
   type MyResult,
   type ResultHistoryEntry,
   type RoundResults,
-} from '@secret-santa/shared';
+} from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';

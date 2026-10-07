@@ -1,4 +1,4 @@
-import type { AuthResponse } from '@secret-santa/shared';
+import type { AuthResponse } from '@line-oa-randomizer/shared';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { devApi, readDevIdentity, REAL_ACCOUNT_IDENTITY } from '../features/dev/dev-api';
 import { ApiError, apiFetch, setAccessToken } from '../lib/api-client';

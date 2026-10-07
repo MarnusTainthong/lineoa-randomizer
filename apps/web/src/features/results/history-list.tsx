@@ -1,4 +1,4 @@
-import type { MyResult, ResultHistoryEntry } from '@secret-santa/shared';
+import type { MyResult, ResultHistoryEntry } from '@line-oa-randomizer/shared';
 import { useRef } from 'react';
 import { Chip } from '../../components/ui/chip';
 import { TH } from '../../lib/th';
@@ -19,7 +19,7 @@ function HistoryItem({ entry, result }: { entry: ResultHistoryEntry; result: MyR
           {entry.isCurrent ? TH.results.current : TH.results.replaced}
         </Chip>
       </div>
-      <SaveImageButton targetRef={exportRef} fileName={`secret-santa-round-${entry.drawVersion}.png`} />
+      <SaveImageButton targetRef={exportRef} fileName={`line-oa-randomizer-round-${entry.drawVersion}.png`} />
       {/* Offscreen render target for the PNG; old rounds carry a "replaced" label. */}
       <div aria-hidden className="pointer-events-none fixed -left-[10000px] top-0">
         <ResultCard

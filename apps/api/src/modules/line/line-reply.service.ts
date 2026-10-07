@@ -30,7 +30,7 @@ export class LineReplyService {
 
   private buildWelcomeText(): string {
     return [
-      'ยินดีต้อนรับสู่ Secret Santa',
+      'ยินดีต้อนรับสู่ LINE OA Randomizer',
       'กดเมนูด้านล่างเพื่อสร้างห้องหรือดูผลการสุ่มได้เลย',
       `ดูผล: ${this.buildLiffUrl('/results')}`,
       `จัดการ: ${this.buildLiffUrl('/manage')}`,

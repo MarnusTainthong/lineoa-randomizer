@@ -1,4 +1,4 @@
-import { DIRECTED_RULE_TYPES, RULE_TYPE, type ParticipantView, type RuleType, type RuleView } from '@secret-santa/shared';
+import { DIRECTED_RULE_TYPES, RULE_TYPE, type ParticipantView, type RuleType, type RuleView } from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, IconButton } from '../../components/ui/button';

@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
-import type { AuthResponse } from '@secret-santa/shared';
+import type { AuthResponse } from '@line-oa-randomizer/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 interface LineVerifiedIdToken {

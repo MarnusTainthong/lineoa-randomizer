@@ -11,7 +11,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { EVENT_STATUS } from '@secret-santa/shared';
+import { EVENT_STATUS } from '@line-oa-randomizer/shared';
 
 export class CreateEventDto {
   @IsString()

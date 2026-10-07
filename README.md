@@ -1,4 +1,4 @@
-# Secret Santa — LINE OA random draw
+# LINE OA Randomizer — random draw
 
 NestJS API + React (LIFF) app for running a gift draw inside LINE. No push messages: everything lives in LIFF.
 Spec: `md-files/line-liff-randomize.md` (UI copy is Thai).
@@ -9,7 +9,7 @@ Spec: `md-files/line-liff-randomize.md` (UI copy is Thai).
 pnpm install
 cp .env.example .env            # set JWT_SECRET; set DEV_AUTH_ENABLED=true and VITE_DEV_AUTH=true
 docker compose up -d db         # PostgreSQL
-pnpm --filter @secret-santa/shared build
+pnpm --filter @line-oa-randomizer/shared build
 pnpm db:migrate                 # creates the schema (first run: name the migration "init")
 pnpm db:seed                    # 10 mock users + sample room (invite code DEMO1234)
 pnpm dev                        # api :3000 (Swagger at /api/docs), web :5173

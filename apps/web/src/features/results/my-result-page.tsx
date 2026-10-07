@@ -1,4 +1,4 @@
-import type { MyResult } from '@secret-santa/shared';
+import type { MyResult } from '@line-oa-randomizer/shared';
 import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -52,7 +52,7 @@ function MyResultContent({ result }: { result: MyResult }) {
             drawVersion={result.drawVersion}
           />
           <div className="flex flex-wrap gap-2">
-            <SaveImageButton targetRef={exportRef} fileName={`secret-santa-round-${result.drawVersion}.png`} />
+            <SaveImageButton targetRef={exportRef} fileName={`line-oa-randomizer-round-${result.drawVersion}.png`} />
             {result.allowViewAllResults && (
               <Link to={`/results/${result.eventId}/all`}>
                 <Button variant="outlined" icon="groups" tabIndex={-1}>{TH.results.viewAll}</Button>

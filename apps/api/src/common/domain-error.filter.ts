@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import type { ApiErrorBody } from '@secret-santa/shared';
+import type { ApiErrorBody } from '@line-oa-randomizer/shared';
 import type { Response } from 'express';
 import { DomainError } from './domain-error';
 

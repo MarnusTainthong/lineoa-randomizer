@@ -1,4 +1,4 @@
-import type { RuleType, RuleView } from '@secret-santa/shared';
+import type { RuleType, RuleView } from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
 export interface RuleFormValues {

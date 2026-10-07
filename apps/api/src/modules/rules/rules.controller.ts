@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RULE_TYPE, type RuleType } from '@secret-santa/shared';
+import { RULE_TYPE, type RuleType } from '@line-oa-randomizer/shared';
 import { ArrayMaxSize, IsArray, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { CurrentUserId } from '../../common/current-user.decorator';
 import { RulesService } from './rules.service';

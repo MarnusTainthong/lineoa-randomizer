@@ -44,7 +44,7 @@ export function AllResultsPage() {
                 </tbody>
               </table>
             </div>
-            <SaveImageButton targetRef={tableRef} fileName={`secret-santa-all-round-${results.drawVersion}.png`} />
+            <SaveImageButton targetRef={tableRef} fileName={`line-oa-randomizer-all-round-${results.drawVersion}.png`} />
           </>
         )}
       </QueryBoundary>

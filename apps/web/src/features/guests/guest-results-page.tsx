@@ -1,4 +1,4 @@
-import type { EventDetail, ResultRow } from '@secret-santa/shared';
+import type { EventDetail, ResultRow } from '@line-oa-randomizer/shared';
 import { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -23,7 +23,7 @@ function GuestRow({ row, event, drawVersion }: { row: ResultRow; event: EventDet
           <p className="text-lg font-bold text-primary">{row.receiverName}</p>
           <div className="flex flex-wrap gap-2">
             <Button variant="text" onClick={() => setIsRevealed(false)}>{TH.guests.hide}</Button>
-            <SaveImageButton targetRef={exportRef} fileName={`secret-santa-${row.giverName}-round-${drawVersion}.png`} />
+            <SaveImageButton targetRef={exportRef} fileName={`line-oa-randomizer-${row.giverName}-round-${drawVersion}.png`} />
           </div>
           <div aria-hidden className="pointer-events-none fixed -left-[10000px] top-0">
             <ResultCard

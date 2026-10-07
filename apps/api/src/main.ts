@@ -22,7 +22,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new DomainErrorFilter());
 
   if (env.NODE_ENV !== 'production') {
-    const swaggerConfig = new DocumentBuilder().setTitle('Secret Santa API').addBearerAuth().build();
+    const swaggerConfig = new DocumentBuilder().setTitle('LINE OA Randomizer API').addBearerAuth().build();
     SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swaggerConfig));
   }
 

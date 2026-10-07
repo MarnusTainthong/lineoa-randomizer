@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { EVENT_STATUS, FEASIBILITY, type DrawResponse } from '@secret-santa/shared';
+import { EVENT_STATUS, FEASIBILITY, type DrawResponse } from '@line-oa-randomizer/shared';
 import { DomainError, NoValidAssignmentError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { SecretSantaStrategy, checkFeasibility, type DrawStrategy } from './engine';
+import { RandomDrawStrategy, checkFeasibility, type DrawStrategy } from './engine';
 
 type DrawMode = 'DRAW' | 'REDRAW';
 
 @Injectable()
 export class DrawService {
   // Swap this to support other draw modes later.
-  private readonly drawStrategy: DrawStrategy = new SecretSantaStrategy();
+  private readonly drawStrategy: DrawStrategy = new RandomDrawStrategy();
 
   constructor(
     private readonly prisma: PrismaService,

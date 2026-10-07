@@ -1,4 +1,4 @@
-import type { EventDetail, ParticipantView } from '@secret-santa/shared';
+import type { EventDetail, ParticipantView } from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
