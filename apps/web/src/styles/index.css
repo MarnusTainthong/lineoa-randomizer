@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Material 3 color roles. Dark values fill in the roles the spec leaves out. */
+:root {
+  --primary: #1f6b54;
+  --on-primary: #ffffff;
+  --primary-container: #bfebd7;
+  --on-primary-container: #00382a;
+  --secondary: #c2573f;
+  --on-secondary: #ffffff;
+  --secondary-container: #ffdad1;
+  --on-secondary-container: #4a1508;
+  --tertiary: #b8892b;
+  --tertiary-container: #ffe4a8;
+  --surface: #fbf8f3;
+  --surface-container: #f3eee6;
+  --surface-container-high: #ebe5db;
+  --outline: #7a7568;
+  --outline-variant: #d4cdbf;
+  --on-surface: #1d1b17;
+  --on-surface-variant: #4a463d;
+  --error: #b3261e;
+  --on-error: #ffffff;
+  --error-container: #f9dedc;
+}
+
+:root.dark {
+  --primary: #8fd3b6;
+  --on-primary: #00382a;
+  --primary-container: #005140;
+  --on-primary-container: #bfebd7;
+  --secondary: #ffb4a2;
+  --on-secondary: #4a1508;
+  --secondary-container: #6b2a1b;
+  --on-secondary-container: #ffdad1;
+  --tertiary: #e8c26a;
+  --tertiary-container: #5a4210;
+  --surface: #161512;
+  --surface-container: #211f1b;
+  --surface-container-high: #2b2924;
+  --outline: #98917f;
+  --outline-variant: #4a463d;
+  --on-surface: #e8e2d9;
+  --on-surface-variant: #cdc6b8;
+  --error: #f2b8b5;
+  --on-error: #601410;
+  --error-container: #8c1d18;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-surface font-sans text-on-surface antialiased;
+    margin: 0;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+.material-symbols-outlined {
+  font-size: 24px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* M3 state layer: hover 8%, pressed 12% of the content color. */
+.state-layer {
+  @apply relative overflow-hidden;
+}
+.state-layer::after {
+  content: '';
+  @apply pointer-events-none absolute inset-0 bg-current opacity-0 transition-opacity duration-200 ease-standard;
+}
+.state-layer:hover::after {
+  opacity: 0.08;
+}
+.state-layer:active::after {
+  opacity: 0.12;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

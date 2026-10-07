@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  OPEN
+  DRAWN
+  CLOSED
+}
+
+enum Feasibility {
+  OK
+  INFEASIBLE
+  TOO_FEW_PARTICIPANTS
+}
+
+enum RuleType {
+  MUTUAL_EXCLUDE
+  ONE_WAY_EXCLUDE
+  GROUP_EXCLUDE
+  HISTORY_EXCLUDE
+  FORCE_ASSIGN
+}
+
+model User {
+  id           String        @id @default(uuid())
+  lineUserId   String        @unique
+  displayName  String
+  pictureUrl   String?
+  isMockUser   Boolean       @default(false) // true only in dev mode; lineUserId starts with "mock:"
+  createdAt    DateTime      @default(now())
+  participants Participant[]
+  events       Event[]       @relation("EventOrganizer")
+}
+
+model Event {
+  id                  String        @id @default(uuid())
+  name                String
+  description         String?
+  budget              Int?
+  exchangeDate        DateTime?
+  inviteCode          String        @unique
+  status              EventStatus   @default(OPEN)
+  organizerId         String
+  organizer           User          @relation("EventOrganizer", fields: [organizerId], references: [id])
+  allowViewAllResults Boolean       @default(false)
+  feasibility         Feasibility   @default(TOO_FEW_PARTICIPANTS)
+  feasibilityReason   String?
+  currentDrawVersion  Int           @default(0)
+  participants        Participant[]
+  rules               Rule[]
+  drawRounds          DrawRound[]
+  assignments         Assignment[]
+  createdAt           DateTime      @default(now())
+}
+
+model Participant {
+  id                  String  @id @default(uuid())
+  eventId             String
+  event               Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId              String? // null = guest (no LINE)
+  user                User?   @relation(fields: [userId], references: [id])
+  displayName         String
+  addedById           String? // organizer who added the guest
+  lastSeenDrawVersion Int     @default(0) // drives the "there was a re-draw" banner
+
+  @@unique([eventId, userId])
+}
+
+model Rule {
+  id             String   @id @default(uuid())
+  eventId        String
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type           RuleType
+  participantIds String[] // directed rules: [from, to]
+  note           String?
+}
+
+model DrawRound {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  version   Int
+  drawnById String
+  drawnAt   DateTime @default(now())
+
+  @@unique([eventId, version])
+}
+
+// Every round is kept; old rows are never deleted or edited (until the room is closed).
+model Assignment {
+  id          String @id @default(uuid())
+  eventId     String
+  event       Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  giverId     String
+  receiverId  String
+  drawVersion Int
+
+  @@unique([eventId, giverId, drawVersion])
+  @@unique([eventId, receiverId, drawVersion])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  eventId   String
+  actorId   String
+  action    String // EVENT_CREATED, DRAW, REDRAW, RULE_CHANGED, SETTING_CHANGED ...
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,58 @@
+{
+  "name": "@secret-santa/api",
+  "version": "3.4.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "prisma generate && nest build",
+    "start": "node dist/main.js",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "test": "jest",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "line:setup-richmenu": "tsx scripts/setup-richmenu.ts"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^9.4.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.0.0",
+    "@nestjs/throttler": "^6.3.0",
+    "@prisma/client": "^6.0.0",
+    "@secret-santa/shared": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
+    "helmet": "^8.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
+    "jest": "^29.7.0",
+    "prisma": "^6.0.0",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "jest": {
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "transform": {
+      "^.+\\.ts$": ["ts-jest", { "isolatedModules": true, "diagnostics": false }]
+    },
+    "moduleNameMapper": {
+      "^@secret-santa/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
+    },
+    "testEnvironment": "node"
+  }
+}
