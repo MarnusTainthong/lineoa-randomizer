@@ -18,7 +18,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
       {message && (
         <div
           role="status"
-          className="fixed inset-x-4 bottom-24 z-50 mx-auto max-w-[448px] rounded-xl bg-on-surface px-4 py-3 text-sm text-surface shadow-lg"
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto max-w-[448px] rounded-xl bg-on-surface px-4 py-3 text-sm text-surface shadow-lg"
         >
           {message}
         </div>

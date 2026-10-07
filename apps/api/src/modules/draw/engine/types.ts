@@ -7,7 +7,7 @@ export interface DrawParticipant {
 
 export interface DrawRule {
   type: RuleType;
-  /** Directed rules (ONE_WAY / HISTORY / FORCE) use [from, to]. */
+  /** Directed rules (ONE_WAY_EXCLUDE / FORCE_ASSIGN) use [from, to]. */
   participantIds: string[];
 }
 

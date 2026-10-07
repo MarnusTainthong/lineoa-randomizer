@@ -18,7 +18,7 @@ import { AuthResponseDto, MockUserViewDto } from '../../common/swagger/response.
 import { DevService } from './dev.service';
 
 class CreateMockUserDto {
-  @ApiPropertyOptional({ type: String, example: 'สมชาย', maxLength: 60 })
+  @ApiPropertyOptional({ type: String, example: 'user-1', maxLength: 60 })
   @IsOptional()
   @IsString()
   @MaxLength(60)

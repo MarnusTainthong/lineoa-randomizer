@@ -8,7 +8,7 @@ import { useEventList } from '../events/use-events';
 export function ResultsListPage() {
   const eventsQuery = useEventList('joined');
   return (
-    <Page title={TH.results.title}>
+    <Page title={TH.results.title} tone="brand" icon="redeem">
       <QueryBoundary query={eventsQuery}>
         {(events) =>
           events.length === 0 ? (
@@ -19,18 +19,21 @@ export function ResultsListPage() {
                 <li key={event.id}>
                   <Link
                     to={`/results/${event.id}`}
-                    className="state-layer flex min-h-16 items-center justify-between gap-3 rounded-2xl bg-surface-container px-4 py-3"
+                    className="state-layer flex flex-col gap-2 rounded-2xl border border-outline-variant bg-surface-container px-4 py-3"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate font-medium">{event.name}</span>
+                      <span className="block truncate font-semibold">{event.name}</span>
                       <span className="block text-xs text-on-surface-variant">
                         {event.participantCount} คน
-                        {event.currentDrawVersion > 0 && ` · ${TH.common.round} ${event.currentDrawVersion}`}
+                        {event.currentDrawVersion > 0 &&
+                          ` · ${TH.common.round} ${event.currentDrawVersion}`}
                       </span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-2">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Chip tone={event.status === 'DRAWN' ? 'primary' : 'neutral'}>
+                        {TH.status[event.status]}
+                      </Chip>
                       {event.hasNewDraw && <Chip tone="accent">{TH.results.redrawnBadge}</Chip>}
-                      <Chip tone={event.status === 'DRAWN' ? 'primary' : 'neutral'}>{TH.status[event.status]}</Chip>
                     </span>
                   </Link>
                 </li>

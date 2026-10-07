@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Page } from '../../components/ui/page';
-import { EmptyState, QueryBoundary } from '../../components/ui/states';
+import { CardSkeleton, EmptyState, ListSkeleton, QueryBoundary } from '../../components/ui/states';
 import { TH } from '../../lib/th';
 import { formatThaiDate } from '../../lib/utils';
 import { HistoryList } from './history-list';
@@ -31,9 +31,18 @@ function MyResultContent({ result }: { result: MyResult }) {
   return (
     <>
       {result.hasNewDraw && !isOpened && (
-        <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl bg-secondary-container p-4 text-on-secondary-container">
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-2xl bg-secondary-container p-4 text-on-secondary-container"
+        >
           <p className="text-sm font-medium">{TH.results.redrawBanner(result.drawVersion)}</p>
-          <Button variant="text" onClick={() => acknowledgeDraw.mutate()}>{TH.results.acknowledge}</Button>
+          <Button
+            variant="text"
+            loading={acknowledgeDraw.isPending}
+            onClick={() => acknowledgeDraw.mutate()}
+          >
+            {TH.results.acknowledge}
+          </Button>
         </div>
       )}
 
@@ -47,15 +56,18 @@ function MyResultContent({ result }: { result: MyResult }) {
           <ResultCard
             eventName={result.eventName}
             receiverName={result.receiverName ?? ''}
-            budget={result.budget}
-            exchangeDate={result.exchangeDate}
             drawVersion={result.drawVersion}
           />
           <div className="flex flex-wrap gap-2">
-            <SaveImageButton targetRef={exportRef} fileName={`line-oa-randomizer-round-${result.drawVersion}.png`} />
+            <SaveImageButton
+              targetRef={exportRef}
+              fileName={`line-oa-randomizer-round-${result.drawVersion}.png`}
+            />
             {result.allowViewAllResults && (
               <Link to={`/results/${result.eventId}/all`}>
-                <Button variant="outlined" icon="groups" tabIndex={-1}>{TH.results.viewAll}</Button>
+                <Button variant="outlined" icon="groups" tabIndex={-1}>
+                  {TH.results.viewAll}
+                </Button>
               </Link>
             )}
           </div>
@@ -65,11 +77,10 @@ function MyResultContent({ result }: { result: MyResult }) {
               variant="export"
               eventName={result.eventName}
               receiverName={result.receiverName ?? ''}
-              budget={result.budget}
-              exchangeDate={result.exchangeDate}
               drawVersion={result.drawVersion}
             />
           </div>
+          {historyQuery.isLoading && <ListSkeleton rows={2} />}
           {historyQuery.data && <HistoryList entries={historyQuery.data} result={result} />}
         </>
       ) : (
@@ -78,7 +89,9 @@ function MyResultContent({ result }: { result: MyResult }) {
           onClick={openEnvelope}
           className="state-layer flex min-h-[320px] w-full flex-col items-center justify-center gap-3 rounded-3xl border border-tertiary bg-primary-container text-on-primary-container"
         >
-          <span className="material-symbols-outlined !text-[56px]" aria-hidden>mail</span>
+          <span className="material-symbols-outlined !text-[56px]" aria-hidden>
+            mail
+          </span>
           <span className="text-lg font-medium">{TH.results.openEnvelope}</span>
           <span className="text-sm opacity-80">{result.eventName}</span>
         </button>
@@ -92,7 +105,9 @@ export function MyResultPage() {
   const resultQuery = useMyResult(eventId);
   return (
     <Page title={resultQuery.data?.eventName ?? TH.results.title} backTo="/results">
-      <QueryBoundary query={resultQuery}>{(result) => <MyResultContent result={result} />}</QueryBoundary>
+      <QueryBoundary query={resultQuery} pending={<CardSkeleton />}>
+        {(result) => <MyResultContent result={result} />}
+      </QueryBoundary>
     </Page>
   );
 }

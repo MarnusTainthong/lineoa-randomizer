@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { ConfirmDialog } from '../../components/ui/dialog';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
-import { QueryBoundary } from '../../components/ui/states';
+import { PanelSkeleton, QueryBoundary } from '../../components/ui/states';
 import { shareTextToChat } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { FeasibilityBanner } from './feasibility-badge';
@@ -41,7 +41,7 @@ export function DrawPage() {
 
   return (
     <Page title={TH.draw.title} backTo={`/manage/${eventId}`}>
-      <QueryBoundary query={eventQuery}>
+      <QueryBoundary query={eventQuery} pending={<PanelSkeleton />}>
         {(event) => (
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-6 text-center">
             <FeasibilityBanner event={event} />
@@ -54,10 +54,20 @@ export function DrawPage() {
                   {TH.draw.done} ({TH.common.round} {doneVersion})
                 </p>
                 <div className="flex flex-col gap-2">
-                  <Button variant="tonal" icon="campaign" onClick={() => void shareTextToChat(TH.manage.announceMessage).catch(() => undefined)}>
+                  <Button
+                    variant="tonal"
+                    icon="campaign"
+                    onClick={() =>
+                      void shareTextToChat(TH.manage.announceMessage).catch(() => undefined)
+                    }
+                  >
                     {TH.manage.announce}
                   </Button>
-                  <Link to={`/results/${eventId}`}><Button variant="outlined" className="w-full" tabIndex={-1}>{TH.nav.results}</Button></Link>
+                  <Link to={`/results/${eventId}`}>
+                    <Button variant="outlined" className="w-full" tabIndex={-1}>
+                      {TH.nav.results}
+                    </Button>
+                  </Link>
                 </div>
               </>
             )}
@@ -65,7 +75,12 @@ export function DrawPage() {
               <>
                 <h2 className="text-2xl font-medium">{event.name}</h2>
                 <p className="text-on-surface-variant">{event.participants.length} คน</p>
-                <Button variant="accent" icon="redeem" disabled={event.feasibility !== 'OK'} onClick={() => setIsConfirming(true)}>
+                <Button
+                  variant="filled"
+                  icon="redeem"
+                  disabled={event.feasibility !== 'OK'}
+                  onClick={() => setIsConfirming(true)}
+                >
                   {isRedraw ? TH.manage.redraw : TH.manage.draw}
                 </Button>
               </>

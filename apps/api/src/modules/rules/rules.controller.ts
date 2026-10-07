@@ -29,7 +29,7 @@ class CreateRuleDto {
     type: [String],
     maxItems: 200,
     example: EXAMPLE_PARTICIPANT_IDS,
-    description: 'Directed rules (ONE_WAY_EXCLUDE, HISTORY_EXCLUDE, FORCE_ASSIGN) use an ordered [from, to] pair.',
+    description: 'Directed rules (ONE_WAY_EXCLUDE, FORCE_ASSIGN) use an ordered [from, to] pair.',
   })
   @IsArray()
   @ArrayMaxSize(200)

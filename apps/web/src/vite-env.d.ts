@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_LIFF_ID?: string;
+  readonly VITE_LIFF_ID_RESULTS?: string;
+  readonly VITE_LIFF_ID_MANAGE?: string;
   readonly VITE_API_URL?: string;
   readonly VITE_DEV_AUTH?: string;
 }

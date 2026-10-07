@@ -5,11 +5,17 @@ interface SwitchProps {
   onChange: (checked: boolean) => void;
   label: string;
   hint?: string;
+  disabled?: boolean;
 }
 
-export function Switch({ checked, onChange, label, hint }: SwitchProps) {
+export function Switch({ checked, onChange, label, hint, disabled = false }: SwitchProps) {
   return (
-    <label className="flex min-h-12 cursor-pointer items-center justify-between gap-4">
+    <label
+      className={cn(
+        'flex min-h-12 items-center justify-between gap-4',
+        disabled ? 'cursor-wait opacity-60' : 'cursor-pointer',
+      )}
+    >
       <span>
         <span className="block text-sm font-medium">{label}</span>
         {hint && <span className="block text-xs text-on-surface-variant">{hint}</span>}
@@ -18,7 +24,9 @@ export function Switch({ checked, onChange, label, hint }: SwitchProps) {
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-busy={disabled || undefined}
         aria-label={label}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
           'relative h-8 w-[52px] shrink-0 rounded-full border-2 transition-colors duration-200 ease-standard',

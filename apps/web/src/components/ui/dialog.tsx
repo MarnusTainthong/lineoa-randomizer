@@ -15,7 +15,10 @@ export function Dialog({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -26,7 +29,11 @@ export function Dialog({
         <h2 className="mb-3 text-xl font-medium">{title}</h2>
         <div className="text-sm text-on-surface-variant">{children}</div>
         <div className="mt-6 flex justify-end gap-2">
-          {actions ?? <Button variant="text" onClick={onClose}>{TH.common.close}</Button>}
+          {actions ?? (
+            <Button variant="text" onClick={onClose}>
+              {TH.common.close}
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -54,8 +61,12 @@ export function ConfirmDialog({
       onClose={onClose}
       actions={
         <>
-          <Button variant="text" onClick={onClose}>{TH.common.cancel}</Button>
-          <Button variant="accent" onClick={onConfirm} disabled={isBusy}>{confirmLabel}</Button>
+          <Button variant="text" onClick={onClose} disabled={isBusy}>
+            {TH.common.cancel}
+          </Button>
+          <Button variant="accent" onClick={onConfirm} loading={isBusy}>
+            {confirmLabel}
+          </Button>
         </>
       }
     >

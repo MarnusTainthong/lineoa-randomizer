@@ -7,10 +7,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { FeasibilityService } from '../feasibility/feasibility.service';
 
-const MOCK_NAME_POOL = [
-  'สมชาย', 'มาลี', 'ปอ', 'นิดา', 'ธนากร', 'พิมพ์ชนก', 'ประเสริฐ', 'วิภา', 'กิตติ', 'อรทัย',
-  'สุรศักดิ์', 'ชลธิชา', 'วรเดช', 'ณัฐพล', 'ปรียา', 'อนุชา', 'รัตนา', 'เจษฎา', 'กมลา', 'ภูมิ',
-];
+/** Next generated test user: user-1, user-2, … skipping names already taken. */
+export function nextMockDisplayName(existingNames: Iterable<string>): string {
+  const taken = new Set(existingNames);
+  let index = 1;
+  while (taken.has(`user-${index}`)) index += 1;
+  return `user-${index}`;
+}
 
 @Injectable()
 export class DevService {
@@ -34,7 +37,7 @@ export class DevService {
       data: {
         // "mock:" can never collide with real LINE ids, which start with "U".
         lineUserId: `mock:${randomUUID()}`,
-        displayName: displayName?.trim() || (await this.pickUnusedMockName()),
+        displayName: displayName?.trim() || (await this.nextDisplayName()),
         isMockUser: true,
       },
     });
@@ -49,11 +52,14 @@ export class DevService {
 
   async addMockParticipants(eventId: string, userId: string, count: number): Promise<void> {
     const event = await this.eventAccess.requireOrganizedEvent(eventId, userId);
-    if (event.status !== EVENT_STATUS.OPEN) throw new DomainError('EVENT_NOT_OPEN', 'จับสลากไปแล้ว');
+    if (event.status !== EVENT_STATUS.OPEN)
+      throw new DomainError('EVENT_NOT_OPEN', 'จับสลากไปแล้ว');
 
     const mockUsers = await this.prisma.user.findMany({ where: { isMockUser: true } });
     const joinedUserIds = new Set(
-      (await this.prisma.participant.findMany({ where: { eventId } })).map((participant) => participant.userId),
+      (await this.prisma.participant.findMany({ where: { eventId } })).map(
+        (participant) => participant.userId,
+      ),
     );
     const usersToAdd = mockUsers.filter((user) => !joinedUserIds.has(user.id)).slice(0, count);
     while (usersToAdd.length < count) {
@@ -63,17 +69,21 @@ export class DevService {
 
     await this.prisma.$transaction(async (transaction) => {
       await transaction.participant.createMany({
-        data: usersToAdd.map((user) => ({ eventId, userId: user.id, displayName: user.displayName })),
+        data: usersToAdd.map((user) => ({
+          eventId,
+          userId: user.id,
+          displayName: user.displayName,
+        })),
       });
       await this.feasibilityService.recompute(eventId, transaction);
     });
   }
 
-  private async pickUnusedMockName(): Promise<string> {
-    const existingNames = new Set(
-      (await this.prisma.user.findMany({ where: { isMockUser: true } })).map((user) => user.displayName),
-    );
-    const unusedName = MOCK_NAME_POOL.find((name) => !existingNames.has(name));
-    return unusedName ?? `ทดสอบ ${existingNames.size + 1}`;
+  private async nextDisplayName(): Promise<string> {
+    const users = await this.prisma.user.findMany({
+      where: { isMockUser: true },
+      select: { displayName: true },
+    });
+    return nextMockDisplayName(users.map((user) => user.displayName));
   }
 }

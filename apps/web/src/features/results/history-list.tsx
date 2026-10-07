@@ -19,7 +19,10 @@ function HistoryItem({ entry, result }: { entry: ResultHistoryEntry; result: MyR
           {entry.isCurrent ? TH.results.current : TH.results.replaced}
         </Chip>
       </div>
-      <SaveImageButton targetRef={exportRef} fileName={`line-oa-randomizer-round-${entry.drawVersion}.png`} />
+      <SaveImageButton
+        targetRef={exportRef}
+        fileName={`line-oa-randomizer-round-${entry.drawVersion}.png`}
+      />
       {/* Offscreen render target for the PNG; old rounds carry a "replaced" label. */}
       <div aria-hidden className="pointer-events-none fixed -left-[10000px] top-0">
         <ResultCard
@@ -27,8 +30,6 @@ function HistoryItem({ entry, result }: { entry: ResultHistoryEntry; result: MyR
           variant="export"
           eventName={result.eventName}
           receiverName={entry.receiverName}
-          budget={result.budget}
-          exchangeDate={result.exchangeDate}
           drawVersion={entry.drawVersion}
           isReplaced={!entry.isCurrent}
         />
@@ -37,7 +38,13 @@ function HistoryItem({ entry, result }: { entry: ResultHistoryEntry; result: MyR
   );
 }
 
-export function HistoryList({ entries, result }: { entries: ResultHistoryEntry[]; result: MyResult }) {
+export function HistoryList({
+  entries,
+  result,
+}: {
+  entries: ResultHistoryEntry[];
+  result: MyResult;
+}) {
   if (entries.length === 0) return null;
   return (
     <section className="space-y-2">

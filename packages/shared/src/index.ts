@@ -14,7 +14,6 @@ export const RULE_TYPE = {
   MUTUAL_EXCLUDE: 'MUTUAL_EXCLUDE',
   ONE_WAY_EXCLUDE: 'ONE_WAY_EXCLUDE',
   GROUP_EXCLUDE: 'GROUP_EXCLUDE',
-  HISTORY_EXCLUDE: 'HISTORY_EXCLUDE',
   FORCE_ASSIGN: 'FORCE_ASSIGN',
 } as const;
 export type RuleType = (typeof RULE_TYPE)[keyof typeof RULE_TYPE];
@@ -24,7 +23,6 @@ export const MIN_PARTICIPANTS_TO_DRAW = 3;
 /** Rule types whose participantIds are an ordered [from, to] pair. */
 export const DIRECTED_RULE_TYPES: readonly RuleType[] = [
   RULE_TYPE.ONE_WAY_EXCLUDE,
-  RULE_TYPE.HISTORY_EXCLUDE,
   RULE_TYPE.FORCE_ASSIGN,
 ];
 

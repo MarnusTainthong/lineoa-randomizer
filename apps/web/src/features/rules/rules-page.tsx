@@ -1,4 +1,10 @@
-import { DIRECTED_RULE_TYPES, RULE_TYPE, type ParticipantView, type RuleType, type RuleView } from '@line-oa-randomizer/shared';
+import {
+  DIRECTED_RULE_TYPES,
+  RULE_TYPE,
+  type ParticipantView,
+  type RuleType,
+  type RuleView,
+} from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, IconButton } from '../../components/ui/button';
@@ -8,7 +14,7 @@ import { TextField } from '../../components/ui/field';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { EmptyState, QueryBoundary } from '../../components/ui/states';
-import { FeasibilityBadge, FeasibilityBanner } from '../events/feasibility-badge';
+import { EventStatusBlock } from '../events/feasibility-badge';
 import { useEventDetail } from '../events/use-events';
 import { TH } from '../../lib/th';
 import { useCreateRule, useDeleteRule, useRules } from './use-rules';
@@ -33,7 +39,9 @@ function RuleFormDialog({
 
   const toggleParticipant = (participantId: string) =>
     setSelectedIds((current) =>
-      current.includes(participantId) ? current.filter((id) => id !== participantId) : [...current, participantId],
+      current.includes(participantId)
+        ? current.filter((id) => id !== participantId)
+        : [...current, participantId],
     );
 
   function changeType(nextType: RuleType) {
@@ -49,9 +57,12 @@ function RuleFormDialog({
       onClose={onClose}
       actions={
         <>
-          <Button variant="text" onClick={onClose}>{TH.common.cancel}</Button>
+          <Button variant="text" onClick={onClose}>
+            {TH.common.cancel}
+          </Button>
           <Button
-            disabled={!canSave || createRule.isPending}
+            disabled={!canSave}
+            loading={createRule.isPending}
             onClick={() =>
               createRule.mutate(
                 { type, participantIds: selectedIds, note: note.trim() || undefined },
@@ -73,7 +84,9 @@ function RuleFormDialog({
             onChange={(event) => changeType(event.target.value as RuleType)}
           >
             {RULE_TYPES.map((ruleType) => (
-              <option key={ruleType} value={ruleType}>{TH.rules.types[ruleType]}</option>
+              <option key={ruleType} value={ruleType}>
+                {TH.rules.types[ruleType]}
+              </option>
             ))}
           </select>
           <span className="mt-1 block text-xs">{TH.rules.typeHelp[type]}</span>
@@ -97,20 +110,36 @@ function RuleFormDialog({
                       onChange={() => toggleParticipant(participant.id)}
                     />
                     <span className="flex-1 text-on-surface">{participant.displayName}</span>
-                    {isDirected && order >= 0 && <Chip tone="primary">{order === 0 ? TH.rules.from : TH.rules.to}</Chip>}
+                    {isDirected && order >= 0 && (
+                      <Chip tone="primary">{order === 0 ? TH.rules.from : TH.rules.to}</Chip>
+                    )}
                   </label>
                 </li>
               );
             })}
           </ul>
         </fieldset>
-        <TextField label={TH.rules.note} value={note} onChange={(event) => setNote(event.target.value)} />
+        <TextField
+          label={TH.rules.note}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+        />
       </div>
     </Dialog>
   );
 }
 
-function RuleRow({ rule, nameById, onDelete }: { rule: RuleView; nameById: Map<string, string>; onDelete: () => void }) {
+function RuleRow({
+  rule,
+  nameById,
+  isDeleting,
+  onDelete,
+}: {
+  rule: RuleView;
+  nameById: Map<string, string>;
+  isDeleting: boolean;
+  onDelete: () => void;
+}) {
   const isDirected = DIRECTED_RULE_TYPES.includes(rule.type);
   const names = rule.participantIds.map((id) => nameById.get(id) ?? '?');
   return (
@@ -120,7 +149,7 @@ function RuleRow({ rule, nameById, onDelete }: { rule: RuleView; nameById: Map<s
         <p className="text-sm">{names.join(isDirected ? ' → ' : ', ')}</p>
         {rule.note && <p className="text-xs text-on-surface-variant">{rule.note}</p>}
       </div>
-      <IconButton icon="delete" label={TH.common.delete} onClick={onDelete} />
+      <IconButton icon="delete" label={TH.common.delete} loading={isDeleting} onClick={onDelete} />
     </li>
   );
 }
@@ -134,13 +163,15 @@ export function RulesPage() {
   const [isAdding, setIsAdding] = useState(false);
 
   return (
-    <Page title={TH.rules.title} backTo={`/manage/${eventId}`} action={<FeasibilityBadge feasibility={eventQuery.data?.feasibility ?? null} />}>
+    <Page title={TH.rules.title} backTo={`/manage/${eventId}`}>
       <QueryBoundary query={eventQuery}>
         {(event) => {
-          const nameById = new Map(event.participants.map((participant) => [participant.id, participant.displayName]));
+          const nameById = new Map(
+            event.participants.map((participant) => [participant.id, participant.displayName]),
+          );
           return (
             <>
-              <FeasibilityBanner event={event} />
+              <EventStatusBlock event={event} />
               <QueryBoundary query={rulesQuery}>
                 {(rules) =>
                   rules.length === 0 ? (
@@ -152,16 +183,27 @@ export function RulesPage() {
                           key={rule.id}
                           rule={rule}
                           nameById={nameById}
-                          onDelete={() => deleteRule.mutate(rule.id, { onError: (error) => showSnackbar(error.message) })}
+                          isDeleting={deleteRule.isPending && deleteRule.variables === rule.id}
+                          onDelete={() =>
+                            deleteRule.mutate(rule.id, {
+                              onError: (error) => showSnackbar(error.message),
+                            })
+                          }
                         />
                       ))}
                     </ul>
                   )
                 }
               </QueryBoundary>
-              <Button icon="add" className="w-full" onClick={() => setIsAdding(true)}>{TH.rules.add}</Button>
+              <Button icon="add" className="w-full" onClick={() => setIsAdding(true)}>
+                {TH.rules.add}
+              </Button>
               {isAdding && (
-                <RuleFormDialog eventId={eventId} participants={event.participants} onClose={() => setIsAdding(false)} />
+                <RuleFormDialog
+                  eventId={eventId}
+                  participants={event.participants}
+                  onClose={() => setIsAdding(false)}
+                />
               )}
             </>
           );

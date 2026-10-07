@@ -1,15 +1,44 @@
 import liff from '@line/liff';
 
-const LIFF_ID = import.meta.env.VITE_LIFF_ID ?? '';
+const FALLBACK_LIFF_ID = import.meta.env.VITE_LIFF_ID ?? '';
+const LIFF_IDS = {
+  results: import.meta.env.VITE_LIFF_ID_RESULTS || FALLBACK_LIFF_ID,
+  manage: import.meta.env.VITE_LIFF_ID_MANAGE || FALLBACK_LIFF_ID,
+} as const;
+
+export type LiffApp = keyof typeof LIFF_IDS;
 
 export const isDevAuthEnabled = import.meta.env.VITE_DEV_AUTH === 'true';
-export const hasLiffId = LIFF_ID.length > 0;
 
-let isLiffInitialized = false;
-export async function initLiff(): Promise<void> {
-  if (isLiffInitialized) return;
-  await liff.init({ liffId: LIFF_ID });
-  isLiffInitialized = true;
+/** `/manage` belongs to the manage LIFF. Results and join use the results LIFF. */
+export function liffAppForPath(pathname: string): LiffApp {
+  return pathname.startsWith('/manage') ? 'manage' : 'results';
+}
+
+export function liffIdFor(app: LiffApp): string {
+  return LIFF_IDS[app];
+}
+
+export function hasLiffId(app: LiffApp = liffAppForPath(window.location.pathname)): boolean {
+  return liffIdFor(app).length > 0;
+}
+
+/** Opens that LIFF on its home path. Null when the id is not configured. */
+export function liffEntryUrl(app: LiffApp): string | null {
+  const liffId = liffIdFor(app);
+  if (!liffId) return null;
+  const path = app === 'manage' ? '/manage' : '/results';
+  return `https://liff.line.me/${liffId}${path}`;
+}
+
+let initializedLiffId = '';
+
+export async function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)): Promise<void> {
+  const liffId = liffIdFor(app);
+  if (!liffId) throw new Error('LIFF ID is not configured');
+  if (initializedLiffId === liffId) return;
+  await liff.init({ liffId });
+  initializedLiffId = liffId;
 }
 
 export async function getLiffIdToken(): Promise<string | null> {
@@ -22,12 +51,7 @@ export async function getLiffIdToken(): Promise<string | null> {
 }
 
 export function isInLineApp(): boolean {
-  return isLiffInitialized && liff.isInClient();
-}
-
-/** Invite link that opens this LIFF app on the join page. */
-export function buildInviteUrl(inviteCode: string): string {
-  return `https://liff.line.me/${LIFF_ID}/join/${inviteCode}`;
+  return initializedLiffId.length > 0 && liff.isInClient();
 }
 
 /** Sends a message through the user's own LINE (not a push), if available. Returns false if unsupported. */

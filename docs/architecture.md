@@ -28,9 +28,12 @@ Layers: Controller (HTTP only) → Service (business logic) → Prisma.
 
 ## Rich Menu → LIFF result flow
 
-Rich Menu button → `https://liff.line.me/<LIFF_ID>/results` → LIFF opens the web app → `liff.getIDToken()` →
+There are two LIFF apps on one web origin. The results LIFF opens `/results`; the manage LIFF opens `/manage`.
+`/` is a landing page for those two menus (and, in dev, the mock-user picker).
+
+Rich Menu button → `https://liff.line.me/<LIFF_ID_RESULTS>/results` → LIFF opens the web app → `liff.getIDToken()` →
 `POST /auth/line` → JWT → `/results` lists rooms → `/results/:id` shows the envelope card. Opening it calls
-`POST /events/:id/my-result/ack`, which sets `lastSeenDrawVersion`.
+`POST /events/:id/my-result/ack`, which sets `lastSeenDrawVersion`. The manage button uses `LIFF_ID_MANAGE` and `/manage`.
 
 ## Result visibility
 

@@ -72,14 +72,6 @@ describe('findAssignments', () => {
     }
   });
 
-  it('avoids last year pairs (history exclude)', () => {
-    const participants = createParticipants(4);
-    const rules: DrawRule[] = [{ type: RULE_TYPE.HISTORY_EXCLUDE, participantIds: ['p2', 'p3'] }];
-    for (let run = 0; run < 100; run += 1) {
-      expect(hasAssignment(drawOrFail(participants, rules), 'p2', 'p3')).toBe(false);
-    }
-  });
-
   it('honours a forced assignment', () => {
     const participants = createParticipants(5);
     const rules: DrawRule[] = [{ type: RULE_TYPE.FORCE_ASSIGN, participantIds: ['p0', 'p4'] }];
@@ -137,6 +129,86 @@ describe('findAssignments', () => {
       );
     }
     expect(seenCycles.size).toBe(2);
+  });
+});
+
+describe('organizer participates in the draw', () => {
+  const organizerId = 'organizer';
+  const participants: DrawParticipant[] = [
+    { id: organizerId, displayName: 'ผู้จัด' },
+    { id: 'a', displayName: 'เอ' },
+    { id: 'b', displayName: 'บี' },
+    { id: 'c', displayName: 'ซี' },
+  ];
+
+  function expectOrganizerGivesAndReceives(assignments: DrawAssignment[]) {
+    expectEveryoneGivesAndReceivesOnce(participants, assignments);
+    expect(assignments.find((assignment) => assignment.giverId === organizerId)?.receiverId).not.toBe(
+      organizerId,
+    );
+    expect(assignments.some((assignment) => assignment.receiverId === organizerId)).toBe(true);
+  }
+
+  it('includes the organizer as both a giver and a receiver', () => {
+    for (let run = 0; run < 30; run += 1) {
+      expectOrganizerGivesAndReceives(drawOrFail(participants, []));
+    }
+  });
+
+  it('keeps a mutual-exclude pair from drawing each other when one of them is the organizer', () => {
+    const rules: DrawRule[] = [{ type: RULE_TYPE.MUTUAL_EXCLUDE, participantIds: [organizerId, 'a'] }];
+    for (let run = 0; run < 40; run += 1) {
+      const assignments = drawOrFail(participants, rules);
+      expectOrganizerGivesAndReceives(assignments);
+      expect(hasAssignment(assignments, organizerId, 'a')).toBe(false);
+      expect(hasAssignment(assignments, 'a', organizerId)).toBe(false);
+    }
+  });
+
+  it('blocks only one direction when the organizer must not draw someone', () => {
+    const rules: DrawRule[] = [{ type: RULE_TYPE.ONE_WAY_EXCLUDE, participantIds: [organizerId, 'a'] }];
+    let someoneDrewTheOrganizer = false;
+    for (let run = 0; run < 80; run += 1) {
+      const assignments = drawOrFail(participants, rules);
+      expectOrganizerGivesAndReceives(assignments);
+      expect(hasAssignment(assignments, organizerId, 'a')).toBe(false);
+      if (hasAssignment(assignments, 'a', organizerId)) someoneDrewTheOrganizer = true;
+    }
+    expect(someoneDrewTheOrganizer).toBe(true);
+  });
+
+  it('keeps a group that includes the organizer from drawing inside the group', () => {
+    // Two people outside the group, so the pair still has someone they are allowed to draw.
+    const groupIds = [organizerId, 'a'];
+    const rules: DrawRule[] = [{ type: RULE_TYPE.GROUP_EXCLUDE, participantIds: groupIds }];
+    for (let run = 0; run < 40; run += 1) {
+      const assignments = drawOrFail(participants, rules);
+      expectOrganizerGivesAndReceives(assignments);
+      for (const assignment of assignments) {
+        const bothInGroup = groupIds.includes(assignment.giverId) && groupIds.includes(assignment.receiverId);
+        expect(bothInGroup).toBe(false);
+      }
+    }
+  });
+
+  it('can force the organizer to draw a specific person', () => {
+    const rules: DrawRule[] = [{ type: RULE_TYPE.FORCE_ASSIGN, participantIds: [organizerId, 'c'] }];
+    for (let run = 0; run < 20; run += 1) {
+      const assignments = drawOrFail(participants, rules);
+      expectOrganizerGivesAndReceives(assignments);
+      expect(hasAssignment(assignments, organizerId, 'c')).toBe(true);
+    }
+  });
+
+  it('is impossible when rules leave the organizer with nobody to draw', () => {
+    const threePeople = participants.slice(0, 3);
+    const rules: DrawRule[] = [
+      { type: RULE_TYPE.ONE_WAY_EXCLUDE, participantIds: [organizerId, 'a'] },
+      { type: RULE_TYPE.ONE_WAY_EXCLUDE, participantIds: [organizerId, 'b'] },
+    ];
+    const result = findAssignments(threePeople, rules);
+    expect(result.isSuccessful).toBe(false);
+    if (!result.isSuccessful) expect(result.reason).toContain('ผู้จัด');
   });
 });
 

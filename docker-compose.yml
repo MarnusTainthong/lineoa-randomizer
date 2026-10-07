@@ -17,6 +17,8 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
         VITE_LIFF_ID: ${VITE_LIFF_ID:-}
+        VITE_LIFF_ID_RESULTS: ${VITE_LIFF_ID_RESULTS:-}
+        VITE_LIFF_ID_MANAGE: ${VITE_LIFF_ID_MANAGE:-}
     depends_on:
       - api
     ports:

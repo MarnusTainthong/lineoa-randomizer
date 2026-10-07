@@ -19,8 +19,9 @@ pnpm dev                        # api :3000 (Swagger at /api/docs), web :5173
 The `apps/api/.env` file is local-only and ignored by Git. It is needed because Prisma runs from
 `apps/api`; the NestJS application itself can load the root `.env`.
 
-Open `http://localhost:5173`, pick a mock user in the Dev Toolbar. Each browser tab keeps its own identity,
-so open several tabs to play organizer and participants at the same time.
+Open `http://localhost:5173`. The landing page asks you to pick a mock user, then offers the two menus
+(see results / manage). Each browser tab keeps its own identity, so open several tabs to play organizer
+and participants at the same time. The dev toolbar can switch user after you are inside a menu.
 
 Other scripts: `pnpm build`, `pnpm build:api`, `pnpm build:web`, `pnpm test`, `pnpm lint`, `pnpm typecheck`.
 
@@ -28,9 +29,12 @@ Other scripts: `pnpm build`, `pnpm build:api`, `pnpm build:web`, `pnpm test`, `p
 
 1. **Messaging API channel (OA)** → `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`. Webhook URL: `https://<domain>/api/line/webhook`. Turn off OA Manager auto-reply/greeting.
 2. **LINE Login channel** → `LINE_LOGIN_CHANNEL_ID`. Link the OA to it (bot link).
-3. **LIFF app**: size Full, scope `profile openid`, bot link on, endpoint URL = web root → `VITE_LIFF_ID`.
+3. **Two LIFF apps** (same LINE Login channel): size Full, scope `profile openid`, bot link on, endpoint URL = web root.
+   - See results → `VITE_LIFF_ID_RESULTS`. Rich menu / keyword opens `https://liff.line.me/<id>/results`.
+   - Manage → `VITE_LIFF_ID_MANAGE`. Opens `https://liff.line.me/<id>/manage`.
+   `VITE_LIFF_ID` is used for both when a specific id is empty.
 4. **Rich menu**: put a 2500×843 PNG (two halves) at `apps/api/scripts/richmenu.png`, then `pnpm line:setup-richmenu`.
-   Left = `/results`, right = `/manage`.
+   Left opens the results LIFF, right opens the manage LIFF.
 5. Local testing with real LINE: run a tunnel (ngrok / cloudflared) and use it for the webhook and LIFF endpoint URL.
    Keep the LIFF app in Development status and add testers.
 
@@ -49,7 +53,7 @@ The API is configured for Railway and the LIFF web app is configured for Cloudfl
 2. Set the API service root directory to `/` and Dockerfile path to `apps/api/Dockerfile`.
 3. Set these API variables in Railway:
    `DATABASE_URL`, `JWT_SECRET`, `LINE_LOGIN_CHANNEL_ID`, `LINE_CHANNEL_ACCESS_TOKEN`,
-   `LINE_CHANNEL_SECRET`, `LIFF_ID`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
+   `LINE_CHANNEL_SECRET`, `LIFF_ID_RESULTS`, `LIFF_ID_MANAGE`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
 4. Set `PORT` only if needed; Railway supplies it automatically. The container runs Prisma migrations before starting.
 5. Add the Railway public API URL to `CORS_ORIGINS` and use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
 
@@ -67,7 +71,8 @@ Create a Pages project connected to this repository with:
 - Build output directory: `apps/web/dist`
 - Root directory: `/`
 - Environment variable: `VITE_API_URL=https://<api-domain>/api`
-- Environment variable: `VITE_LIFF_ID=<your-liff-id>`
+- Environment variable: `VITE_LIFF_ID_RESULTS=<results-liff-id>`
+- Environment variable: `VITE_LIFF_ID_MANAGE=<manage-liff-id>`
 
 After both services are deployed, set the LIFF endpoint URL to the Cloudflare Pages domain and update
 `APP_BASE_URL` and `CORS_ORIGINS` on Railway to that same URL.

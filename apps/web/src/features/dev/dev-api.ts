@@ -22,3 +22,24 @@ export function readDevIdentity(): string | null {
 export function writeDevIdentity(identity: string): void {
   sessionStorage.setItem(DEV_IDENTITY_STORAGE_KEY, identity);
 }
+
+export function clearDevIdentity(): void {
+  sessionStorage.removeItem(DEV_IDENTITY_STORAGE_KEY);
+}
+
+function openMenu(): void {
+  if (window.location.pathname === '/') window.location.reload();
+  else window.location.assign('/');
+}
+
+/** Stores the chosen test user and opens the main menu. */
+export function selectDevIdentity(identity: string): void {
+  writeDevIdentity(identity);
+  openMenu();
+}
+
+/** Drops the test user and returns to the picker. */
+export function leaveDevIdentity(): void {
+  clearDevIdentity();
+  openMenu();
+}

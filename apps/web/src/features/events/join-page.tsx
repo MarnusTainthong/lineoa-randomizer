@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
-import { QueryBoundary } from '../../components/ui/states';
+import { LoadingIndicator, PanelSkeleton, QueryBoundary } from '../../components/ui/states';
 import { isOaFriend } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { eventsApi } from './events-api';
@@ -30,7 +30,7 @@ export function JoinPage() {
 
   return (
     <Page title={TH.join.title}>
-      <QueryBoundary query={previewQuery}>
+      <QueryBoundary query={previewQuery} pending={<PanelSkeleton />}>
         {(preview) => (
           <div className="flex flex-col items-center gap-4 py-8 text-center">
             <h2 className="text-2xl font-medium">{preview.name}</h2>
@@ -40,12 +40,14 @@ export function JoinPage() {
             {preview.isAlreadyJoined && joinedEventId === null && (
               <>
                 <p className="text-on-surface-variant">{TH.join.already}</p>
-                <Link to={`/results/${preview.eventId}`}><Button tabIndex={-1}>{TH.nav.results}</Button></Link>
+                <Link to={`/results/${preview.eventId}`}>
+                  <Button tabIndex={-1}>{TH.nav.results}</Button>
+                </Link>
               </>
             )}
             {!preview.isAlreadyJoined && preview.status === 'OPEN' && joinedEventId === null && (
               <Button
-                disabled={joinEvent.isPending}
+                loading={joinEvent.isPending}
                 onClick={() =>
                   joinEvent.mutate(inviteCode, {
                     onSuccess: ({ eventId }) => setJoinedEventId(eventId),
@@ -56,10 +58,15 @@ export function JoinPage() {
                 {TH.join.action}
               </Button>
             )}
-            {joinedEventId && (
+            {joinedEventId && friendQuery.isPending && <LoadingIndicator />}
+            {joinedEventId && !friendQuery.isPending && (
               <>
-                {friendQuery.data === false && <p className="text-sm text-on-surface-variant">{TH.join.addFriend}</p>}
-                <Button onClick={() => navigate(`/results/${joinedEventId}`, { replace: true })}>{TH.nav.results}</Button>
+                {friendQuery.data === false && (
+                  <p className="text-sm text-on-surface-variant">{TH.join.addFriend}</p>
+                )}
+                <Button onClick={() => navigate(`/results/${joinedEventId}`, { replace: true })}>
+                  {TH.nav.results}
+                </Button>
               </>
             )}
           </div>

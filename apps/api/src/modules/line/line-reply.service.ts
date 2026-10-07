@@ -45,7 +45,9 @@ export class LineReplyService {
   }
 
   private buildLiffUrl(path: string): string {
-    return `https://liff.line.me/${this.configService.get<string>('LIFF_ID') ?? ''}${path}`;
+    const key = path.startsWith('/manage') ? 'LIFF_ID_MANAGE' : 'LIFF_ID_RESULTS';
+    const liffId = this.configService.get<string>(key) || this.configService.get<string>('LIFF_ID') || '';
+    return `https://liff.line.me/${liffId}${path}`;
   }
 
   private async reply(replyToken: string, text: string): Promise<void> {

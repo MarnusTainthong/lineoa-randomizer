@@ -2,17 +2,15 @@ import type { EventDetail, ParticipantView } from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
-import { Chip } from '../../components/ui/chip';
 import { ConfirmDialog } from '../../components/ui/dialog';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { QueryBoundary } from '../../components/ui/states';
 import { Switch } from '../../components/ui/switch';
-import { buildInviteUrl, shareTextToChat } from '../../lib/liff';
+import { shareTextToChat } from '../../lib/liff';
 import { TH } from '../../lib/th';
-import { formatThaiDate } from '../../lib/utils';
 import { AddGuestsDialog } from './add-guests-dialog';
-import { FeasibilityBadge, FeasibilityBanner } from './feasibility-badge';
+import { EventStatusBlock } from './feasibility-badge';
 import { ParticipantList } from './participant-list';
 import { useEventDetail, useRemoveParticipant, useUpdateEvent } from './use-events';
 
@@ -48,21 +46,7 @@ function EventDetailContent({ event }: { event: EventDetail }) {
 
   return (
     <>
-      <section className="space-y-2 rounded-2xl bg-surface-container p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Chip tone={isDrawn ? 'primary' : 'neutral'}>{TH.status[event.status]}</Chip>
-          {isOpen && <FeasibilityBadge feasibility={event.feasibility} />}
-          {event.currentDrawVersion > 0 && <Chip>{TH.common.round} {event.currentDrawVersion}</Chip>}
-        </div>
-        {event.description && <p className="text-sm">{event.description}</p>}
-        <p className="text-xs text-on-surface-variant">
-          {event.budget !== null && `งบ ${event.budget.toLocaleString('th-TH')} ${TH.common.baht}`}
-          {event.budget !== null && event.exchangeDate && ' · '}
-          {event.exchangeDate && `แลกของขวัญ ${formatThaiDate(event.exchangeDate)}`}
-        </p>
-      </section>
-
-      <FeasibilityBanner event={event} />
+      <EventStatusBlock event={event} />
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
@@ -76,18 +60,14 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           onRemove={setParticipantToRemove}
         />
         {isOpen && (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="tonal"
-              icon="share"
-              onClick={() => void shareToChat(`${TH.manage.inviteMessage(event.name)}\n${buildInviteUrl(event.inviteCode)}`)}
-            >
-              {TH.manage.invite}
-            </Button>
-            <Button variant="outlined" icon="person_add" onClick={() => setIsAddingGuests(true)}>
-              {TH.manage.addGuests}
-            </Button>
-          </div>
+          <Button
+            variant="tonal"
+            icon="person_add"
+            className="w-full"
+            onClick={() => setIsAddingGuests(true)}
+          >
+            {TH.manage.addGuests}
+          </Button>
         )}
       </section>
 
@@ -96,19 +76,27 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           label={TH.manage.allowViewAll}
           hint={TH.manage.allowViewAllHint}
           checked={event.allowViewAllResults}
+          disabled={updateEvent.isPending}
           onChange={(allowViewAllResults) =>
-            updateEvent.mutate({ allowViewAllResults }, { onError: (error) => showSnackbar(error.message) })
+            updateEvent.mutate(
+              { allowViewAllResults },
+              { onError: (error) => showSnackbar(error.message) },
+            )
           }
         />
       </section>
 
       <div className="flex flex-col gap-2">
         <Link to={`/manage/${event.id}/rules`}>
-          <Button variant="outlined" icon="rule" className="w-full" tabIndex={-1}>{TH.manage.rules}</Button>
+          <Button variant="orange" icon="rule" className="w-full" tabIndex={-1}>
+            {TH.manage.rules}
+          </Button>
         </Link>
         {isDrawn && hasGuests && (
           <Link to={`/manage/${event.id}/guests`}>
-            <Button variant="outlined" icon="visibility" className="w-full" tabIndex={-1}>{TH.manage.guestResults}</Button>
+            <Button variant="outlined" icon="visibility" className="w-full" tabIndex={-1}>
+              {TH.manage.guestResults}
+            </Button>
           </Link>
         )}
         {isDrawn && (
@@ -121,7 +109,7 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           </Button>
         )}
         <Button
-          variant="accent"
+          variant="filled"
           icon="redeem"
           disabled={!canDraw}
           onClick={() => navigate(`/manage/${event.id}/draw`)}
@@ -131,10 +119,14 @@ function EventDetailContent({ event }: { event: EventDetail }) {
         {!canDraw && isOpen && event.feasibility === 'TOO_FEW_PARTICIPANTS' && (
           <p className="text-center text-xs text-on-surface-variant">{TH.manage.notEnough}</p>
         )}
-        <Button variant="text" onClick={() => setIsConfirmingClose(true)}>{TH.manage.close}</Button>
+        <Button variant="danger" className="w-full" onClick={() => setIsConfirmingClose(true)}>
+          {TH.manage.close}
+        </Button>
       </div>
 
-      {isAddingGuests && <AddGuestsDialog eventId={event.id} onClose={() => setIsAddingGuests(false)} />}
+      {isAddingGuests && (
+        <AddGuestsDialog eventId={event.id} onClose={() => setIsAddingGuests(false)} />
+      )}
       {participantToRemove && (
         <ConfirmDialog
           title={participantToRemove.displayName}
@@ -155,8 +147,15 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           title={TH.manage.close}
           message={TH.manage.closeConfirm}
           onClose={() => setIsConfirmingClose(false)}
+          isBusy={updateEvent.isPending}
           onConfirm={() =>
-            updateEvent.mutate({ status: 'CLOSED' }, { onSuccess: () => navigate('/manage', { replace: true }) })
+            updateEvent.mutate(
+              { status: 'CLOSED' },
+              {
+                onSuccess: () => navigate('/manage', { replace: true }),
+                onError: (error) => showSnackbar(error.message),
+              },
+            )
           }
         />
       )}
@@ -169,7 +168,9 @@ export function EventDetailPage() {
   const eventQuery = useEventDetail(eventId);
   return (
     <Page title={eventQuery.data?.name ?? TH.manage.title} backTo="/manage">
-      <QueryBoundary query={eventQuery}>{(event) => <EventDetailContent event={event} />}</QueryBoundary>
+      <QueryBoundary query={eventQuery}>
+        {(event) => <EventDetailContent event={event} />}
+      </QueryBoundary>
     </Page>
   );
 }

@@ -8,6 +8,8 @@ export interface AppEnv {
   LINE_CHANNEL_ACCESS_TOKEN: string;
   LINE_CHANNEL_SECRET: string;
   LIFF_ID: string;
+  LIFF_ID_RESULTS: string;
+  LIFF_ID_MANAGE: string;
   APP_BASE_URL: string;
   CORS_ORIGINS: string;
 }
@@ -31,6 +33,7 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
   }
 
   const appBaseUrl = readString(config, 'APP_BASE_URL', 'http://localhost:5173');
+  const fallbackLiffId = readString(config, 'LIFF_ID', readString(config, 'VITE_LIFF_ID'));
   return {
     DATABASE_URL: databaseUrl,
     JWT_SECRET: jwtSecret,
@@ -40,7 +43,9 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     LINE_LOGIN_CHANNEL_ID: readString(config, 'LINE_LOGIN_CHANNEL_ID'),
     LINE_CHANNEL_ACCESS_TOKEN: readString(config, 'LINE_CHANNEL_ACCESS_TOKEN'),
     LINE_CHANNEL_SECRET: readString(config, 'LINE_CHANNEL_SECRET'),
-    LIFF_ID: readString(config, 'LIFF_ID', readString(config, 'VITE_LIFF_ID')),
+    LIFF_ID: fallbackLiffId,
+    LIFF_ID_RESULTS: readString(config, 'LIFF_ID_RESULTS', readString(config, 'VITE_LIFF_ID_RESULTS', fallbackLiffId)),
+    LIFF_ID_MANAGE: readString(config, 'LIFF_ID_MANAGE', readString(config, 'VITE_LIFF_ID_MANAGE', fallbackLiffId)),
     APP_BASE_URL: appBaseUrl,
     CORS_ORIGINS: readString(config, 'CORS_ORIGINS', appBaseUrl),
   };

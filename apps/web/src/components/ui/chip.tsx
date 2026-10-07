@@ -12,7 +12,12 @@ const TONE_CLASSES: Record<ChipTone, string> = {
 
 export function Chip({ tone = 'neutral', children }: { tone?: ChipTone; children: ReactNode }) {
   return (
-    <span className={cn('inline-flex h-7 items-center rounded-lg px-3 text-xs font-medium', TONE_CLASSES[tone])}>
+    <span
+      className={cn(
+        'inline-flex min-h-7 items-center rounded-full px-3 py-1 text-xs font-medium',
+        TONE_CLASSES[tone],
+      )}
+    >
       {children}
     </span>
   );

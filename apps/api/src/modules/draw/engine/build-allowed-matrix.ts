@@ -17,7 +17,6 @@ function buildForbiddenPairs(rules: DrawRule[]): Array<[string, string]> {
         }
         break;
       case RULE_TYPE.ONE_WAY_EXCLUDE:
-      case RULE_TYPE.HISTORY_EXCLUDE:
         if (firstId && secondId) forbiddenPairs.push([firstId, secondId]);
         break;
       case RULE_TYPE.FORCE_ASSIGN:

@@ -36,6 +36,19 @@ describe('LineReplyService', () => {
     expect(replyMessage.mock.calls[0][0].messages[0].text).toContain('/LIFF123/manage');
   });
 
+  it('uses a separate LIFF id for each menu when both are configured', async () => {
+    const replyMessage = jest.fn().mockResolvedValue({});
+    const client = { replyMessage } as unknown as LineReplyClient;
+    const configService = {
+      get: (key: string) => (key === 'LIFF_ID_MANAGE' ? 'LIFF_MANAGE' : 'LIFF_RESULTS'),
+    } as unknown as ConfigService;
+    const service = new LineReplyService(client, configService);
+    await service.handleEvents([followEvent]);
+    const text = replyMessage.mock.calls[0][0].messages[0].text as string;
+    expect(text).toContain('https://liff.line.me/LIFF_RESULTS/results');
+    expect(text).toContain('https://liff.line.me/LIFF_MANAGE/manage');
+  });
+
   it('ignores other text and never calls pushMessage', async () => {
     const { service, replyMessage, pushMessage } = createService();
     await service.handleEvents([textEvent('สวัสดี'), followEvent]);

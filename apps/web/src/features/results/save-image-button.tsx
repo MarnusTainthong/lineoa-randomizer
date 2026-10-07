@@ -55,7 +55,7 @@ export function SaveImageButton({
 
   return (
     <>
-      <Button variant="tonal" icon="download" onClick={() => void saveImage()} disabled={isBusy}>
+      <Button variant="tonal" icon="download" onClick={() => void saveImage()} loading={isBusy}>
         {TH.results.saveImage}
       </Button>
       {fallbackImageUrl && (

@@ -19,11 +19,17 @@ export function AddGuestsDialog({ eventId, onClose }: { eventId: string; onClose
       onClose={onClose}
       actions={
         <>
-          <Button variant="text" onClick={onClose}>{TH.common.cancel}</Button>
+          <Button variant="text" onClick={onClose}>
+            {TH.common.cancel}
+          </Button>
           <Button
-            disabled={names.length === 0 || addGuests.isPending}
+            disabled={names.length === 0}
+            loading={addGuests.isPending}
             onClick={() =>
-              addGuests.mutate(names, { onSuccess: onClose, onError: (error) => showSnackbar(error.message) })
+              addGuests.mutate(names, {
+                onSuccess: onClose,
+                onError: (error) => showSnackbar(error.message),
+              })
             }
           >
             {TH.common.save} ({names.length})
@@ -33,7 +39,11 @@ export function AddGuestsDialog({ eventId, onClose }: { eventId: string; onClose
     >
       <div className="space-y-3">
         <p>{TH.manage.addGuestsNotice}</p>
-        <TextAreaField label={TH.manage.addGuestsHint} value={rawNames} onChange={(event) => setRawNames(event.target.value)} />
+        <TextAreaField
+          label={TH.manage.addGuestsHint}
+          value={rawNames}
+          onChange={(event) => setRawNames(event.target.value)}
+        />
       </div>
     </Dialog>
   );
