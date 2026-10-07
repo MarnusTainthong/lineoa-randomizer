@@ -5,7 +5,11 @@
   "packageManager": "pnpm@11.18.0",
   "scripts": {
     "dev": "pnpm --filter @line-oa-randomizer/shared build && pnpm -r --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/api dev",
+    "dev:web": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/web dev",
     "build": "pnpm -r build",
+    "build:api": "pnpm --filter @line-oa-randomizer/shared build && pnpm --filter @line-oa-randomizer/api build",
+    "start:api": "pnpm --filter @line-oa-randomizer/api db:deploy && pnpm --filter @line-oa-randomizer/api start",
     "test": "pnpm -r test",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
