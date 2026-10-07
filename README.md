@@ -8,12 +8,16 @@ Spec: `md-files/line-liff-randomize.md` (UI copy is Thai).
 ```bash
 pnpm install
 cp .env.example .env            # set JWT_SECRET; set DEV_AUTH_ENABLED=true and VITE_DEV_AUTH=true
+cp .env apps/api/.env            # Prisma CLI loads env from apps/api
 docker compose up -d db         # PostgreSQL
 pnpm --filter @line-oa-randomizer/shared build
-pnpm db:migrate                 # creates the schema (first run: name the migration "init")
+pnpm db:migrate                 # first run: name the migration "init"
 pnpm db:seed                    # 10 mock users + sample room (invite code DEMO1234)
 pnpm dev                        # api :3000 (Swagger at /api/docs), web :5173
 ```
+
+The `apps/api/.env` file is local-only and ignored by Git. It is needed because Prisma runs from
+`apps/api`; the NestJS application itself can load the root `.env`.
 
 Open `http://localhost:5173`, pick a mock user in the Dev Toolbar. Each browser tab keeps its own identity,
 so open several tabs to play organizer and participants at the same time.
@@ -42,18 +46,16 @@ The API is configured for Railway and the LIFF web app is configured for Cloudfl
 ### Railway API
 
 1. Create a Railway project with a PostgreSQL service and an API service linked to this repository.
-2. Set the API service root directory to `/` and deploy. `railway.json` selects `apps/api/Dockerfile`.
+2. Set the API service root directory to `/` and Dockerfile path to `apps/api/Dockerfile`.
 3. Set these API variables in Railway:
    `DATABASE_URL`, `JWT_SECRET`, `LINE_LOGIN_CHANNEL_ID`, `LINE_CHANNEL_ACCESS_TOKEN`,
    `LINE_CHANNEL_SECRET`, `LIFF_ID`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
 4. Set `PORT` only if needed; Railway supplies it automatically. The container runs Prisma migrations before starting.
 5. Add the Railway public API URL to `CORS_ORIGINS` and use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
 
-From a logged-in Railway CLI:
-
-```bash
-pnpm deploy:railway
-```
+For the first Railway deployment, add the initial migration locally with `pnpm db:migrate`,
+commit `apps/api/prisma/migrations/`, and then deploy. Railway runs `prisma migrate deploy`
+automatically when the container starts.
 
 The API health check is `GET /api/health`.
 
@@ -66,13 +68,6 @@ Create a Pages project connected to this repository with:
 - Root directory: `/`
 - Environment variable: `VITE_API_URL=https://<api-domain>/api`
 - Environment variable: `VITE_LIFF_ID=<your-liff-id>`
-
-The included `apps/web/public/_redirects` keeps React Router routes working on refresh. To deploy from the
-Cloudflare CLI, authenticate with `pnpm dlx wrangler login`, set `CLOUDFLARE_PROJECT_NAME` if needed, then run:
-
-```bash
-pnpm deploy:cloudflare
-```
 
 After both services are deployed, set the LIFF endpoint URL to the Cloudflare Pages domain and update
 `APP_BASE_URL` and `CORS_ORIGINS` on Railway to that same URL.
