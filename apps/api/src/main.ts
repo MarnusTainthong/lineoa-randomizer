@@ -6,6 +6,7 @@ loadDotenv({ path: ['.env', '../../.env'] });
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApiErrorDto } from './common/swagger/response.dto';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { DomainErrorFilter } from './common/domain-error.filter';
@@ -22,8 +23,16 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new DomainErrorFilter());
 
   if (env.NODE_ENV !== 'production') {
-    const swaggerConfig = new DocumentBuilder().setTitle('LINE OA Randomizer API').addBearerAuth().build();
-    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swaggerConfig));
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('LINE OA Randomizer API')
+      .setVersion('3.4.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup(
+      'api/docs',
+      app,
+      SwaggerModule.createDocument(app, swaggerConfig, { extraModels: [ApiErrorDto] }),
+    );
   }
 
   await app.listen(env.PORT);
