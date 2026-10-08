@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { liffAppForLocation, liffAppForOpenedLiff, liffIdFromContextToken, openedLiffId } from './liff';
+import {
+  entryPathForLiffOpen,
+  liffAppForLocation,
+  liffAppForOpenedLiff,
+  liffIdFromContextToken,
+  openedLiffId,
+} from './liff';
 
 const IDS = { results: 'results-id', manage: 'manage-id' };
 
@@ -36,5 +42,27 @@ describe('liffAppForOpenedLiff', () => {
   it('follows the opened LIFF when the path still belongs to the other app', () => {
     expect(liffAppForOpenedLiff('manage-id', '/results', '', IDS)).toBe('manage');
     expect(liffAppForOpenedLiff('results-id', '/manage', '', IDS)).toBe('results');
+  });
+});
+
+describe('entryPathForLiffOpen', () => {
+  it('opens the results page from the results rich menu', () => {
+    expect(entryPathForLiffOpen('/', '', 'results-id', IDS)).toBe('/results');
+    expect(entryPathForLiffOpen('/', '?liff.state=%2Fresults', 'results-id', IDS)).toBe('/results');
+  });
+
+  it('opens the manage page from the manage rich menu', () => {
+    expect(entryPathForLiffOpen('/', '', 'manage-id', IDS)).toBe('/manage');
+    expect(entryPathForLiffOpen('/', '?liff.state=%2Fmanage', 'manage-id', IDS)).toBe('/manage');
+  });
+
+  it('keeps a page LINE already put in the path', () => {
+    expect(entryPathForLiffOpen('/results', '', 'results-id', IDS)).toBe('/results');
+    expect(entryPathForLiffOpen('/manage/event-1', '', 'manage-id', IDS)).toBe('/manage/event-1');
+  });
+
+  it('stays on the landing page when one LIFF id is shared by both menus', () => {
+    const shared = { results: 'same-id', manage: 'same-id' };
+    expect(entryPathForLiffOpen('/', '', 'same-id', shared)).toBe('/');
   });
 });

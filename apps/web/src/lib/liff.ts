@@ -60,6 +60,50 @@ export function liffAppForOpenedLiff(
   return liffAppForLocation(pathname, search);
 }
 
+/**
+ * Page the rich menu should open.
+ * An endpoint path such as `/results` stays as it is.
+ * On `/`, `liff.state` is the path from the LIFF URL. If that is missing,
+ * the opened LIFF id picks `/results` or `/manage`.
+ */
+export function entryPathForLiffOpen(
+  pathname: string,
+  search: string,
+  openedId: string | null,
+  ids: { results: string; manage: string } = LIFF_IDS,
+): string {
+  if (pathname !== '/') return `${pathname}${search}`;
+
+  const fromState = pathFromLiffState(search);
+  if (fromState) return fromState;
+
+  const app = appForUniqueLiffId(openedId, ids);
+  if (app === 'manage') return '/manage';
+  if (app === 'results') return '/results';
+  return `${pathname}${search}`;
+}
+
+function pathFromLiffState(search: string): string | null {
+  const state = new URLSearchParams(search).get('liff.state');
+  if (!state) return null;
+  const path = state.startsWith('/') ? state : `/${state}`;
+  const pathOnly = path.split('?')[0];
+  if (!pathOnly || pathOnly === '/') return null;
+  return path;
+}
+
+/** Null when both menus share one id — the path has to decide. */
+function appForUniqueLiffId(
+  openedId: string | null,
+  ids: { results: string; manage: string },
+): LiffApp | null {
+  if (!openedId) return null;
+  const isManage = ids.manage.length > 0 && openedId === ids.manage;
+  const isResults = ids.results.length > 0 && openedId === ids.results;
+  if (isManage === isResults) return null;
+  return isManage ? 'manage' : 'results';
+}
+
 function currentLiffApp(): LiffApp {
   return liffAppForOpenedLiff(
     openedLiffId(window.location.search, window.location.hash),
@@ -103,6 +147,8 @@ export function initLiff(app?: LiffApp): Promise<void> {
     .init({ liffId })
     .then(() => {
       initializedLiffId = liffId;
+      // React Router reads the URL once, and it misses LINE's later replaceState.
+      applyLiffEntryPath();
     })
     .catch((error: unknown) => {
       initPromise = null;
@@ -112,9 +158,30 @@ export function initLiff(app?: LiffApp): Promise<void> {
   return initPromise;
 }
 
+/** Moves `/` to the rich-menu page once we know which LIFF opened. */
+function applyLiffEntryPath(): void {
+  const openedId = liff.id || initializedLiffId || openedLiffId(window.location.search, window.location.hash);
+  const target = entryPathForLiffOpen(window.location.pathname, window.location.search, openedId);
+  const current = `${window.location.pathname}${window.location.search}`;
+  if (target === current) return;
+  window.history.replaceState(window.history.state, '', target);
+}
+
+/**
+ * Run before the React router is created. `liff.init` rewrites `liff.state`
+ * after the router would already have captured `/`.
+ */
+export async function prepareLiffEntry(): Promise<void> {
+  if (isDevAuthEnabled || !hasLiffId()) return;
+  await initLiff();
+}
+
 /** Endpoint path only. Query and hash (liff.state, OAuth code) make LINE's in-app browser go blank. */
 function loginRedirectUri(): string {
-  return `${window.location.origin}${window.location.pathname}`;
+  const openedId = liff.id || initializedLiffId || openedLiffId(window.location.search, window.location.hash);
+  const target = entryPathForLiffOpen(window.location.pathname, window.location.search, openedId);
+  const path = target.split('?')[0] || '/';
+  return `${window.location.origin}${path}`;
 }
 
 export async function getLiffIdToken(): Promise<string | null> {

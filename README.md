@@ -55,7 +55,7 @@ The API is configured for Railway and the LIFF web app is configured for Cloudfl
    `DATABASE_URL`, `JWT_SECRET`, `LINE_LOGIN_CHANNEL_ID`, `LINE_CHANNEL_ACCESS_TOKEN`,
    `LINE_CHANNEL_SECRET`, `LIFF_ID_RESULTS`, `LIFF_ID_MANAGE`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
 4. Set `PORT` only if needed; Railway supplies it automatically. The container runs Prisma migrations before starting.
-5. Add the Railway public API URL to `CORS_ORIGINS` and use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
+5. Set `CORS_ORIGINS` and `APP_BASE_URL` to the web app origin, for example `https://<web-domain>`. Use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
 
 For the first Railway deployment, add the initial migration locally with `pnpm db:migrate`,
 commit `apps/api/prisma/migrations/`, and then deploy. Railway runs `prisma migrate deploy`

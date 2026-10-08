@@ -12,21 +12,23 @@ import { RulesPage } from '../features/rules/rules-page';
 import { LandingPage } from '../features/home/landing-page';
 import { AppShell } from './app-shell';
 
-export const router = createBrowserRouter([
-  {
-    element: <AppShell />,
-    children: [
-      { path: '/', element: <LandingPage /> },
-      { path: '/results', element: <ResultsListPage /> },
-      { path: '/results/:eventId', element: <MyResultPage /> },
-      { path: '/results/:eventId/all', element: <AllResultsPage /> },
-      { path: '/manage', element: <ManageListPage /> },
-      { path: '/manage/new', element: <CreateEventPage /> },
-      { path: '/manage/:eventId', element: <EventDetailPage /> },
-      { path: '/manage/:eventId/rules', element: <RulesPage /> },
-      { path: '/manage/:eventId/draw', element: <DrawPage /> },
-      { path: '/manage/:eventId/guests', element: <GuestResultsPage /> },
-      { path: '/join/:inviteCode', element: <JoinPage /> },
-    ],
-  },
-]);
+export function createAppRouter() {
+  return createBrowserRouter([
+    {
+      element: <AppShell />,
+      children: [
+        { path: '/', element: <LandingPage /> },
+        { path: '/results', element: <ResultsListPage /> },
+        { path: '/results/:eventId', element: <MyResultPage /> },
+        { path: '/results/:eventId/all', element: <AllResultsPage /> },
+        { path: '/manage', element: <ManageListPage /> },
+        { path: '/manage/new', element: <CreateEventPage /> },
+        { path: '/manage/:eventId', element: <EventDetailPage /> },
+        { path: '/manage/:eventId/rules', element: <RulesPage /> },
+        { path: '/manage/:eventId/draw', element: <DrawPage /> },
+        { path: '/manage/:eventId/guests', element: <GuestResultsPage /> },
+        { path: '/join/:inviteCode', element: <JoinPage /> },
+      ],
+    },
+  ]);
+}

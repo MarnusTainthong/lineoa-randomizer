@@ -37,7 +37,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule.register(), { rawBody: true });
 
   app.setGlobalPrefix('api');
-  app.use(helmet());
+  // The web app is on another host. Helmet's default same-origin policy makes the browser report "Load failed".
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.enableCors({ origin: env.CORS_ORIGINS.split(',').map((origin) => origin.trim()) });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new DomainErrorFilter());
