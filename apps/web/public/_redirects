@@ -1,8 +1,6 @@
-# Rich menu opens /results and /manage. Proxy them to the app shell.
-# Status 200 keeps the path, so React Router still sees /results.
-# Do not use "/* /index.html 200": Workers rejects that as an infinite loop.
+# Rich menu opens these exact paths. Status 200 keeps the URL so React Router
+# still sees /results and /manage.
+# Wildcard rules that point at /index.html are rejected: Cloudflare strips
+# ".html" and "/index", then the wildcard matches again.
 /results /index.html 200
 /manage /index.html 200
-/results/* /index.html 200
-/manage/* /index.html 200
-/join/* /index.html 200
