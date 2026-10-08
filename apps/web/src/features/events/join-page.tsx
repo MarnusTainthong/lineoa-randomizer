@@ -1,7 +1,7 @@
-import { normalizeInviteCode } from '@line-oa-randomizer/shared';
+import { isInviteCode, normalizeInviteCode } from '@line-oa-randomizer/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { TextField } from '../../components/ui/field';
 import { Page } from '../../components/ui/page';
@@ -86,32 +86,39 @@ function JoinRoom({ code }: { code: string }) {
 
 function JoinCodeForm() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [rawCode, setRawCode] = useState('');
+  const [rejected, setRejected] = useState(false);
   const code = normalizeInviteCode(rawCode);
-  const backTo = location.state?.from === 'home' ? '/' : '/results';
 
   return (
-    <Page title={TH.join.title} backTo={backTo}>
+    <Page title={TH.join.title} tone="brand" icon="key">
       <form
         className="space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
-          if (code) navigate(`/join/${code}`);
+          if (isInviteCode(code)) navigate(`/join/${code}`);
         }}
       >
         <p className="text-sm text-on-surface-variant">{TH.join.hint}</p>
         <TextField
           label={TH.join.codeLabel}
           value={rawCode}
-          inputMode="numeric"
+          inputMode="text"
           autoComplete="off"
-          maxLength={7}
-          placeholder="482 193"
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={6}
+          placeholder={TH.join.placeholder}
+          error={rejected ? TH.join.invalid : undefined}
           className="text-center text-2xl font-bold tracking-[0.3em]"
-          onChange={(event) => setRawCode(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value.toUpperCase();
+            setRejected(/[^A-Z0-9\s]/.test(value));
+            setRawCode(value.replace(/[^A-Z0-9]/g, '').slice(0, 6));
+          }}
         />
-        <Button type="submit" className="w-full" disabled={code.length === 0}>
+        <Button type="submit" className="w-full" disabled={!isInviteCode(code)}>
           {TH.join.action}
         </Button>
       </form>

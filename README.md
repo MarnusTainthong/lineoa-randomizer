@@ -12,7 +12,7 @@ cp .env apps/api/.env            # Prisma CLI loads env from apps/api
 docker compose up -d db         # PostgreSQL
 pnpm --filter @line-oa-randomizer/shared build
 pnpm db:migrate                 # first run: name the migration "init"
-pnpm db:seed                    # 10 mock users + sample room (invite code DEMO1234)
+pnpm db:seed                    # 10 mock users + sample room (invite code DEMO01)
 pnpm dev                        # api :3000 (Swagger at /api/docs), web :5173
 ```
 

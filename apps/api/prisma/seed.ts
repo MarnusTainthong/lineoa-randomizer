@@ -22,15 +22,15 @@ async function main(): Promise<void> {
   const [organizer] = users;
   if (!organizer) throw new Error('seed users missing');
 
-  await prisma.auditLog.deleteMany({ where: { eventId: { in: (await prisma.event.findMany({ where: { inviteCode: 'DEMO1234' } })).map((event) => event.id) } } });
-  await prisma.event.deleteMany({ where: { inviteCode: 'DEMO1234' } });
+  await prisma.auditLog.deleteMany({ where: { eventId: { in: (await prisma.event.findMany({ where: { inviteCode: 'DEMO01' } })).map((event) => event.id) } } });
+  await prisma.event.deleteMany({ where: { inviteCode: 'DEMO01' } });
 
   const event = await prisma.event.create({
     data: {
       name: 'ปีใหม่ ออฟฟิศ',
       description: 'แลกของขวัญงานเลี้ยงสิ้นปี',
       budget: 500,
-      inviteCode: 'DEMO1234',
+      inviteCode: 'DEMO01',
       organizerId: organizer.id,
       participants: {
         create: users.map((user) => ({ userId: user.id, displayName: user.displayName })),
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
     data: { feasibility: check.feasibility, feasibilityReason: check.reason },
   });
 
-  console.log(`Seeded room "${event.name}" (invite code DEMO1234) with ${users.length} mock users`);
+  console.log(`Seeded room "${event.name}" (invite code DEMO01) with ${users.length} mock users`);
 }
 
 main()

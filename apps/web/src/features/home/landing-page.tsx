@@ -104,11 +104,7 @@ export function LandingPage() {
             return (
               <li key={menu.to}>
                 {destination.startsWith('/') ? (
-                  <Link
-                    to={destination}
-                    state={menu.to === '/join' ? { from: 'home' } : undefined}
-                    className={className}
-                  >
+                  <Link to={destination} className={className}>
                     {body}
                   </Link>
                 ) : (

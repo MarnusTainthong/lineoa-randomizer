@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import type { Event, Participant, User } from '@prisma/client';
 import {
   EVENT_STATUS,
+  isInviteCode,
   normalizeInviteCode,
   type EventDetail,
   type EventSummary,
@@ -176,7 +177,7 @@ export class EventsService {
 
   async previewInvite(inviteCode: string, userId: string): Promise<InvitePreview> {
     const event = await this.prisma.event.findUnique({
-      where: { inviteCode: normalizeInviteCode(inviteCode) },
+      where: { inviteCode: this.parseInviteCode(inviteCode) },
       include: { participants: { select: { userId: true } } },
     });
     if (!event || event.status === EVENT_STATUS.CLOSED) throw new NotFoundException('ไม่พบห้องนี้');
@@ -190,7 +191,7 @@ export class EventsService {
 
   async join(inviteCode: string, userId: string): Promise<{ eventId: string }> {
     const event = await this.prisma.event.findUnique({
-      where: { inviteCode: normalizeInviteCode(inviteCode) },
+      where: { inviteCode: this.parseInviteCode(inviteCode) },
     });
     if (!event || event.status === EVENT_STATUS.CLOSED) throw new NotFoundException('ไม่พบห้องนี้');
 
@@ -210,6 +211,19 @@ export class EventsService {
       await this.feasibilityService.recompute(event.id, transaction);
     });
     return { eventId: event.id };
+  }
+
+  /** Letters and digits only, six characters, uppercase. */
+  private parseInviteCode(inviteCode: string): string {
+    const code = normalizeInviteCode(inviteCode);
+    if (!isInviteCode(code)) {
+      throw new DomainError(
+        'INVALID_INVITE_CODE',
+        'รหัสห้องต้องเป็นตัวอักษรหรือตัวเลข 6 ตัว',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return code;
   }
 
   /** PDPA: closing a room removes everyone's personal data and every draw result. */

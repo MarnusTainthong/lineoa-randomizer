@@ -1,6 +1,8 @@
 import { randomInt } from 'node:crypto';
 
-/** Six digits, including leading zeros. Easy to read out, unique via the database. */
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+/** Six letters or digits. Unique via the database. */
 export function createInviteCode(): string {
-  return randomInt(0, 1_000_000).toString().padStart(6, '0');
+  return Array.from({ length: 6 }, () => ALPHABET[randomInt(0, ALPHABET.length)]).join('');
 }
