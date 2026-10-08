@@ -15,11 +15,27 @@ export function liffAppForPath(pathname: string): LiffApp {
   return pathname.startsWith('/manage') ? 'manage' : 'results';
 }
 
+/**
+ * LINE opens the site root with the real path in `liff.state` before `liff.init`
+ * rewrites the URL. The id passed to init must match that LIFF, or LINE reports
+ * "Invalid LIFF ID".
+ */
+export function liffAppForLocation(pathname: string, search = ''): LiffApp {
+  const state = new URLSearchParams(search).get('liff.state');
+  const fromState = state?.split('?')[0];
+  const path = fromState ? (fromState.startsWith('/') ? fromState : `/${fromState}`) : pathname;
+  return liffAppForPath(path);
+}
+
+function currentLiffApp(): LiffApp {
+  return liffAppForLocation(window.location.pathname, window.location.search);
+}
+
 export function liffIdFor(app: LiffApp): string {
   return LIFF_IDS[app];
 }
 
-export function hasLiffId(app: LiffApp = liffAppForPath(window.location.pathname)): boolean {
+export function hasLiffId(app: LiffApp = currentLiffApp()): boolean {
   return liffIdFor(app).length > 0;
 }
 
@@ -35,7 +51,7 @@ let initializedLiffId = '';
 let initializingId = '';
 let initPromise: Promise<void> | null = null;
 
-export function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)): Promise<void> {
+export function initLiff(app: LiffApp = currentLiffApp()): Promise<void> {
   const liffId = liffIdFor(app);
   if (!liffId) return Promise.reject(new Error('LIFF ID is not configured'));
   if (initializedLiffId === liffId) return Promise.resolve();

@@ -1,6 +1,12 @@
 import type { ApiErrorBody } from '@line-oa-randomizer/shared';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+/** Accepts either `https://host` or `https://host/api`. Routes are always under `/api`. */
+function apiBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api').replace(/\/$/, '');
+  return raw.endsWith('/api') ? raw : `${raw}/api`;
+}
+
+const API_URL = apiBaseUrl();
 
 export class ApiError extends Error {
   constructor(
