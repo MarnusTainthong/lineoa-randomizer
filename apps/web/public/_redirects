@@ -6,5 +6,7 @@
 # /manage/:id still loads the app.
 /results /index.html 200
 /manage /index.html 200
+/join /join.html 200
 /results/* /results.html 200
 /manage/* /manage.html 200
+/join/* /join.html 200

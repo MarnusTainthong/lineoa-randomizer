@@ -1,4 +1,4 @@
-import type { EventDetail, ParticipantView } from '@line-oa-randomizer/shared';
+import { formatInviteCode, type EventDetail, type ParticipantView } from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -47,6 +47,37 @@ function EventDetailContent({ event }: { event: EventDetail }) {
   return (
     <>
       <EventStatusBlock event={event} />
+
+      {isOpen && (
+        <section className="rounded-2xl border border-outline-variant bg-surface-container px-4 py-4 text-center">
+          <p className="text-sm font-medium text-on-surface-variant">{TH.join.codeLabel}</p>
+          <p className="mt-1 text-3xl font-bold tracking-[0.2em]">{formatInviteCode(event.inviteCode)}</p>
+          <p className="mt-1 text-sm text-on-surface-variant">{TH.join.shareHint}</p>
+          <div className="mt-3 flex gap-2">
+            <Button
+              variant="tonal"
+              className="flex-1"
+              onClick={() => {
+                void navigator.clipboard.writeText(formatInviteCode(event.inviteCode)).then(
+                  () => showSnackbar(TH.join.copied),
+                  () => showSnackbar(TH.common.errorTitle),
+                );
+              }}
+            >
+              {TH.join.copy}
+            </Button>
+            <Button
+              variant="outlined"
+              className="flex-1"
+              onClick={() =>
+                void shareToChat(TH.join.shareMessage(event.name, formatInviteCode(event.inviteCode)))
+              }
+            >
+              {TH.join.share}
+            </Button>
+          </div>
+        </section>
+      )}
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">

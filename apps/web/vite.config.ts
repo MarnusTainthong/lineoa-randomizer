@@ -15,7 +15,7 @@ function richMenuHtml(): Plugin {
     closeBundle() {
       const dist = resolve(webRoot, 'dist');
       const indexHtml = resolve(dist, 'index.html');
-      for (const route of ['results', 'manage']) {
+      for (const route of ['results', 'manage', 'join']) {
         copyFileSync(indexHtml, resolve(dist, `${route}.html`));
       }
     },

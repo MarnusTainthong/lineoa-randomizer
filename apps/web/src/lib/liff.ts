@@ -4,7 +4,10 @@ const FALLBACK_LIFF_ID = import.meta.env.VITE_LIFF_ID ?? '';
 const LIFF_IDS = {
   results: import.meta.env.VITE_LIFF_ID_RESULTS || FALLBACK_LIFF_ID,
   manage: import.meta.env.VITE_LIFF_ID_MANAGE || FALLBACK_LIFF_ID,
+  join: import.meta.env.VITE_LIFF_ID_JOIN || FALLBACK_LIFF_ID,
 } as const;
+
+type LiffIds = { results: string; manage: string; join: string };
 
 export type LiffApp = keyof typeof LIFF_IDS;
 
@@ -13,9 +16,11 @@ export const isDevAuthEnabled = import.meta.env.VITE_DEV_AUTH === 'true';
 /** Both web flags on: either LIFF opens `/` instead of its menu. */
 export const openMainPage = isDevAuthEnabled && import.meta.env.VITE_SHOW_ERRORS === 'true';
 
-/** `/manage` belongs to the manage LIFF. Results and join use the results LIFF. */
+/** Each rich-menu LIFF owns its path. A code such as `/join/482193` stays on the join LIFF. */
 export function liffAppForPath(pathname: string): LiffApp {
-  return pathname.startsWith('/manage') ? 'manage' : 'results';
+  if (pathname.startsWith('/manage')) return 'manage';
+  if (pathname.startsWith('/join')) return 'join';
+  return 'results';
 }
 
 /**
@@ -56,10 +61,10 @@ export function liffAppForOpenedLiff(
   openedId: string | null,
   pathname: string,
   search = '',
-  ids: { results: string; manage: string } = LIFF_IDS,
+  ids: LiffIds = LIFF_IDS,
 ): LiffApp {
-  if (openedId && openedId === ids.manage) return 'manage';
-  if (openedId && openedId === ids.results) return 'results';
+  const opened = appForUniqueLiffId(openedId, ids);
+  if (opened) return opened;
   return liffAppForLocation(pathname, search);
 }
 
@@ -67,14 +72,14 @@ export function liffAppForOpenedLiff(
  * Page the rich menu should open.
  * An endpoint path such as `/results` stays as it is.
  * On `/`, `liff.state` is the path from the LIFF URL. If that is missing,
- * the opened LIFF id picks `/results` or `/manage`.
- * When both dev flags are on, either menu home opens `/`.
+ * the opened LIFF id picks `/results`, `/manage`, or `/join`.
+ * When both dev flags are on, any menu home opens `/`.
  */
 export function entryPathForLiffOpen(
   pathname: string,
   search: string,
   openedId: string | null,
-  ids: { results: string; manage: string } = LIFF_IDS,
+  ids: LiffIds = LIFF_IDS,
   landOnMain = false,
 ): string {
   if (landOnMain && isLiffMenuHome(pathname)) return '/';
@@ -85,13 +90,14 @@ export function entryPathForLiffOpen(
 
   const app = appForUniqueLiffId(openedId, ids);
   if (app === 'manage') return '/manage';
+  if (app === 'join') return '/join';
   if (app === 'results') return '/results';
   return `${pathname}${search}`;
 }
 
 /** Rich-menu homes. Deeper paths such as `/manage/:id` stay put. */
 function isLiffMenuHome(pathname: string): boolean {
-  return pathname === '/' || pathname === '/results' || pathname === '/manage';
+  return pathname === '/' || pathname === '/results' || pathname === '/manage' || pathname === '/join';
 }
 
 function pathFromLiffState(search: string): string | null {
@@ -103,16 +109,13 @@ function pathFromLiffState(search: string): string | null {
   return path;
 }
 
-/** Null when both menus share one id — the path has to decide. */
-function appForUniqueLiffId(
-  openedId: string | null,
-  ids: { results: string; manage: string },
-): LiffApp | null {
+/** Null when the opened id matches more than one menu — the path has to decide. */
+function appForUniqueLiffId(openedId: string | null, ids: LiffIds): LiffApp | null {
   if (!openedId) return null;
-  const isManage = ids.manage.length > 0 && openedId === ids.manage;
-  const isResults = ids.results.length > 0 && openedId === ids.results;
-  if (isManage === isResults) return null;
-  return isManage ? 'manage' : 'results';
+  const matches = (['results', 'manage', 'join'] as const).filter(
+    (app) => ids[app].length > 0 && openedId === ids[app],
+  );
+  return matches.length === 1 ? matches[0] : null;
 }
 
 function currentLiffApp(): LiffApp {
@@ -140,7 +143,7 @@ export function hasLiffId(app: LiffApp = currentLiffApp()): boolean {
 export function liffEntryUrl(app: LiffApp): string | null {
   const liffId = liffIdFor(app);
   if (!liffId) return null;
-  const path = app === 'manage' ? '/manage' : '/results';
+  const path = app === 'manage' ? '/manage' : app === 'join' ? '/join' : '/results';
   return `https://liff.line.me/${liffId}${path}`;
 }
 

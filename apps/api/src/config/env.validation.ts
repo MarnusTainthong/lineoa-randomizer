@@ -10,6 +10,7 @@ export interface AppEnv {
   LIFF_ID: string;
   LIFF_ID_RESULTS: string;
   LIFF_ID_MANAGE: string;
+  LIFF_ID_JOIN: string;
   APP_BASE_URL: string;
   CORS_ORIGINS: string;
 }
@@ -46,6 +47,7 @@ export function validateEnv(config: Record<string, unknown>): AppEnv {
     LIFF_ID: fallbackLiffId,
     LIFF_ID_RESULTS: readString(config, 'LIFF_ID_RESULTS', readString(config, 'VITE_LIFF_ID_RESULTS', fallbackLiffId)),
     LIFF_ID_MANAGE: readString(config, 'LIFF_ID_MANAGE', readString(config, 'VITE_LIFF_ID_MANAGE', fallbackLiffId)),
+    LIFF_ID_JOIN: readString(config, 'LIFF_ID_JOIN', readString(config, 'VITE_LIFF_ID_JOIN', fallbackLiffId)),
     APP_BASE_URL: appBaseUrl,
     CORS_ORIGINS: readString(config, 'CORS_ORIGINS', appBaseUrl),
   };

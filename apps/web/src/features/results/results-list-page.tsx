@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Button } from '../../components/ui/button';
 import { Chip } from '../../components/ui/chip';
 import { Page } from '../../components/ui/page';
 import { EmptyState, QueryBoundary } from '../../components/ui/states';
@@ -9,6 +10,12 @@ export function ResultsListPage() {
   const eventsQuery = useEventList('joined');
   return (
     <Page title={TH.results.title} tone="brand" icon="redeem">
+      <Link to="/join" className="block">
+        <Button variant="tonal" icon="key" className="w-full" tabIndex={-1}>
+          {TH.join.byCode}
+        </Button>
+      </Link>
+      <p className="-mt-3 text-center text-sm text-on-surface-variant">{TH.join.hint}</p>
       <QueryBoundary query={eventsQuery}>
         {(events) =>
           events.length === 0 ? (

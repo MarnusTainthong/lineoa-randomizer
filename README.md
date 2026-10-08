@@ -33,18 +33,19 @@ Only the exact string `true` turns a flag on. If a variable is missing, empty, o
 - `VITE_DEV_AUTH` — default off. When `true`, skips LINE login and shows the mock-user picker, dev banner, and user-switch toolbar. Menu links stay on this site instead of opening `liff.line.me`. Needs `DEV_AUTH_ENABLED=true` on the API it calls. Leave it off for stage and production.
 - `VITE_SHOW_ERRORS` — default off. When `true`, adds a diagnostic block on error screens: error name and message, HTTP status and code, page origin and path, and both LIFF ids. The URL hash is omitted because it can hold LINE tokens. This does not enable mock login, so it can stay on for a stage build.
 
-When `VITE_DEV_AUTH` and `VITE_SHOW_ERRORS` are both `true`, the results LIFF and the manage LIFF both open `/` (the main page) instead of `/results` or `/manage`. One flag left off keeps the normal menu paths. `DEV_AUTH_ENABLED` still has to be `true` on that API for the mock-user picker on `/` to sign in.
+When `VITE_DEV_AUTH` and `VITE_SHOW_ERRORS` are both `true`, the results, manage, and join LIFFs all open `/` (the main page). One flag left off keeps the normal menu paths. `DEV_AUTH_ENABLED` still has to be `true` on that API for the mock-user picker on `/` to sign in.
 
 ## LINE setup
 
 1. **Messaging API channel (OA)** → `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`. Webhook URL: `https://<domain>/api/line/webhook`. Turn off OA Manager auto-reply/greeting.
 2. **LINE Login channel** → `LINE_LOGIN_CHANNEL_ID`. Link the OA to it (bot link).
-3. **Two LIFF apps** (same LINE Login channel): size Full, scope `profile openid`, bot link on, endpoint URL = web root.
+3. **Three LIFF apps** (same LINE Login channel): size Full, scope `profile openid`, bot link on, endpoint URL = web root.
    - See results → `VITE_LIFF_ID_RESULTS`. Opens `https://liff.line.me/<id>/results`.
+   - Join with a room code → `VITE_LIFF_ID_JOIN`. Opens `https://liff.line.me/<id>/join`.
    - Manage → `VITE_LIFF_ID_MANAGE`. Opens `https://liff.line.me/<id>/manage`.
-   `VITE_LIFF_ID` is used for both when a specific id is empty.
+   `VITE_LIFF_ID` is used for any menu whose specific id is empty.
 4. **Rich menu**: create it in LINE Official Account Manager. This repo does not create or upload a menu.
-   Left button: `https://liff.line.me/<VITE_LIFF_ID_RESULTS>/results`. Right button: `https://liff.line.me/<VITE_LIFF_ID_MANAGE>/manage`.
+   Results: `https://liff.line.me/<VITE_LIFF_ID_RESULTS>/results`. Join: `https://liff.line.me/<VITE_LIFF_ID_JOIN>/join`. Manage: `https://liff.line.me/<VITE_LIFF_ID_MANAGE>/manage`.
 5. Local testing with real LINE: run a tunnel (ngrok / cloudflared) and use it for the webhook and LIFF endpoint URL.
    Keep the LIFF app in Development status and add testers.
 
@@ -63,7 +64,7 @@ The API is configured for Railway and the LIFF web app is configured for Cloudfl
 2. Set the API service root directory to `/` and Dockerfile path to `apps/api/Dockerfile`.
 3. Set these API variables in Railway:
    `DATABASE_URL`, `JWT_SECRET`, `LINE_LOGIN_CHANNEL_ID`, `LINE_CHANNEL_ACCESS_TOKEN`,
-   `LINE_CHANNEL_SECRET`, `LIFF_ID_RESULTS`, `LIFF_ID_MANAGE`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
+   `LINE_CHANNEL_SECRET`, `LIFF_ID_RESULTS`, `LIFF_ID_JOIN`, `LIFF_ID_MANAGE`, `APP_BASE_URL`, `CORS_ORIGINS`, and `NODE_ENV=production`.
 4. Set `PORT` only if needed; Railway supplies it automatically. The container runs Prisma migrations before starting.
 5. Set `CORS_ORIGINS` and `APP_BASE_URL` to the web app origin, for example `https://<web-domain>`. Use `https://<api-domain>/api` as the web app's `VITE_API_URL`.
 
@@ -82,6 +83,7 @@ Create a Pages project connected to this repository with:
 - Root directory: `/`
 - Environment variable: `VITE_API_URL=https://<api-domain>/api`
 - Environment variable: `VITE_LIFF_ID_RESULTS=<results-liff-id>`
+- Environment variable: `VITE_LIFF_ID_JOIN=<join-liff-id>`
 - Environment variable: `VITE_LIFF_ID_MANAGE=<manage-liff-id>`
 
 After both services are deployed, set the LIFF endpoint URL to the Cloudflare Pages domain and update

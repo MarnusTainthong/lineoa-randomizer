@@ -40,13 +40,18 @@ describe('LineReplyService', () => {
     const replyMessage = jest.fn().mockResolvedValue({});
     const client = { replyMessage } as unknown as LineReplyClient;
     const configService = {
-      get: (key: string) => (key === 'LIFF_ID_MANAGE' ? 'LIFF_MANAGE' : 'LIFF_RESULTS'),
+      get: (key: string) => {
+        if (key === 'LIFF_ID_MANAGE') return 'LIFF_MANAGE';
+        if (key === 'LIFF_ID_JOIN') return 'LIFF_JOIN';
+        return 'LIFF_RESULTS';
+      },
     } as unknown as ConfigService;
     const service = new LineReplyService(client, configService);
     await service.handleEvents([followEvent]);
     const text = replyMessage.mock.calls[0][0].messages[0].text as string;
     expect(text).toContain('https://liff.line.me/LIFF_RESULTS/results');
     expect(text).toContain('https://liff.line.me/LIFF_MANAGE/manage');
+    expect(text).toContain('https://liff.line.me/LIFF_JOIN/join');
   });
 
   it('ignores other text and never calls pushMessage', async () => {

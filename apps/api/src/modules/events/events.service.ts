@@ -1,13 +1,14 @@
-import { randomBytes } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Event, Participant, User } from '@prisma/client';
 import {
   EVENT_STATUS,
+  normalizeInviteCode,
   type EventDetail,
   type EventSummary,
   type InvitePreview,
   type ParticipantView,
 } from '@line-oa-randomizer/shared';
+import { createInviteCode } from './invite-code';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -42,27 +43,34 @@ export class EventsService {
   async create(userId: string, dto: CreateEventDto): Promise<EventDetail> {
     const organizer = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
-    const event = await this.prisma.$transaction(async (transaction) => {
-      const createdEvent = await transaction.event.create({
-        data: {
-          name: dto.name.trim(),
-          description: dto.description?.trim() || null,
-          budget: dto.budget ?? null,
-          exchangeDate: dto.exchangeDate ? new Date(dto.exchangeDate) : null,
-          allowViewAllResults: dto.allowViewAllResults ?? false,
-          inviteCode: randomBytes(6).toString('base64url'),
-          organizerId: userId,
-          // The organizer takes part like anyone else.
-          participants: { create: { userId, displayName: organizer.displayName } },
-        },
-      });
-      await transaction.auditLog.create({
-        data: { eventId: createdEvent.id, actorId: userId, action: 'EVENT_CREATED' },
-      });
-      await this.feasibilityService.recompute(createdEvent.id, transaction);
-      return createdEvent;
-    });
-    return this.getDetail(event.id, userId);
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      try {
+        const event = await this.prisma.$transaction(async (transaction) => {
+          const createdEvent = await transaction.event.create({
+            data: {
+              name: dto.name.trim(),
+              description: dto.description?.trim() || null,
+              budget: dto.budget ?? null,
+              exchangeDate: dto.exchangeDate ? new Date(dto.exchangeDate) : null,
+              allowViewAllResults: dto.allowViewAllResults ?? false,
+              inviteCode: createInviteCode(),
+              organizerId: userId,
+              // The organizer takes part like anyone else.
+              participants: { create: { userId, displayName: organizer.displayName } },
+            },
+          });
+          await transaction.auditLog.create({
+            data: { eventId: createdEvent.id, actorId: userId, action: 'EVENT_CREATED' },
+          });
+          await this.feasibilityService.recompute(createdEvent.id, transaction);
+          return createdEvent;
+        });
+        return this.getDetail(event.id, userId);
+      } catch (error) {
+        if (!isInviteCodeConflict(error) || attempt === 4) throw error;
+      }
+    }
+    throw new Error('could not allocate an invite code');
   }
 
   async list(userId: string, scope: 'organized' | 'joined'): Promise<EventSummary[]> {
@@ -168,7 +176,7 @@ export class EventsService {
 
   async previewInvite(inviteCode: string, userId: string): Promise<InvitePreview> {
     const event = await this.prisma.event.findUnique({
-      where: { inviteCode },
+      where: { inviteCode: normalizeInviteCode(inviteCode) },
       include: { participants: { select: { userId: true } } },
     });
     if (!event || event.status === EVENT_STATUS.CLOSED) throw new NotFoundException('ไม่พบห้องนี้');
@@ -181,7 +189,9 @@ export class EventsService {
   }
 
   async join(inviteCode: string, userId: string): Promise<{ eventId: string }> {
-    const event = await this.prisma.event.findUnique({ where: { inviteCode } });
+    const event = await this.prisma.event.findUnique({
+      where: { inviteCode: normalizeInviteCode(inviteCode) },
+    });
     if (!event || event.status === EVENT_STATUS.CLOSED) throw new NotFoundException('ไม่พบห้องนี้');
 
     const existingParticipant = await this.prisma.participant.findUnique({
@@ -213,4 +223,8 @@ export class EventsService {
       this.prisma.auditLog.create({ data: { eventId, actorId: userId, action: 'EVENT_CLOSED' } }),
     ]);
   }
+}
+
+function isInviteCodeConflict(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
 }

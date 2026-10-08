@@ -133,3 +133,15 @@ export interface MockUserView {
   id: string;
   displayName: string;
 }
+
+/** Drop spaces so `482 193` and `482193` are the same code. Letters are uppercased. */
+export function normalizeInviteCode(raw: string): string {
+  return raw.trim().replace(/\s+/g, '').toUpperCase();
+}
+
+/** Six-digit codes are shown as `482 193`. Older codes are shown unchanged. */
+export function formatInviteCode(code: string): string {
+  const normalized = normalizeInviteCode(code);
+  if (/^\d{6}$/.test(normalized)) return `${normalized.slice(0, 3)} ${normalized.slice(3)}`;
+  return normalized;
+}

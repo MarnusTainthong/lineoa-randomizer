@@ -33,6 +33,7 @@ export class LineReplyService {
       'ยินดีต้อนรับสู่ LINE OA Randomizer',
       'กดเมนูด้านล่างเพื่อสร้างห้องหรือดูผลการสุ่มได้เลย',
       `ดูผล: ${this.buildLiffUrl('/results')}`,
+      `เข้าร่วม: ${this.buildLiffUrl('/join')}`,
       `จัดการ: ${this.buildLiffUrl('/manage')}`,
     ].join('\n');
   }
@@ -45,7 +46,11 @@ export class LineReplyService {
   }
 
   private buildLiffUrl(path: string): string {
-    const key = path.startsWith('/manage') ? 'LIFF_ID_MANAGE' : 'LIFF_ID_RESULTS';
+    const key = path.startsWith('/manage')
+      ? 'LIFF_ID_MANAGE'
+      : path.startsWith('/join')
+        ? 'LIFF_ID_JOIN'
+        : 'LIFF_ID_RESULTS';
     const liffId = this.configService.get<string>(key) || this.configService.get<string>('LIFF_ID') || '';
     return `https://liff.line.me/${liffId}${path}`;
   }

@@ -28,12 +28,12 @@ Layers: Controller (HTTP only) → Service (business logic) → Prisma.
 
 ## Rich Menu → LIFF result flow
 
-There are two LIFF apps on one web origin. The results LIFF opens `/results`; the manage LIFF opens `/manage`.
-`/` is a landing page for those two menus (and, in dev, the mock-user picker).
+There are three LIFF apps on one web origin. The results LIFF opens `/results`, the join LIFF opens `/join`, and the manage LIFF opens `/manage`.
+`/` is a landing page for those menus (and, in dev, the mock-user picker).
 
 A rich menu created in LINE Official Account Manager opens `https://liff.line.me/<LIFF_ID_RESULTS>/results` → LIFF opens the web app → `liff.getIDToken()` →
 `POST /auth/line` → JWT → `/results` lists rooms → `/results/:id` shows the envelope card. Opening it calls
-`POST /events/:id/my-result/ack`, which sets `lastSeenDrawVersion`. The manage button uses `LIFF_ID_MANAGE` and `/manage`.
+`POST /events/:id/my-result/ack`, which sets `lastSeenDrawVersion`. The manage button uses `LIFF_ID_MANAGE` and `/manage`. The join button uses `LIFF_ID_JOIN` and `/join`.
 
 ## Result visibility
 

@@ -19,6 +19,7 @@ services:
         VITE_LIFF_ID: ${VITE_LIFF_ID:-}
         VITE_LIFF_ID_RESULTS: ${VITE_LIFF_ID_RESULTS:-}
         VITE_LIFF_ID_MANAGE: ${VITE_LIFF_ID_MANAGE:-}
+        VITE_LIFF_ID_JOIN: ${VITE_LIFF_ID_JOIN:-}
     depends_on:
       - api
     ports:

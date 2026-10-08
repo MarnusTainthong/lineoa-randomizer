@@ -5,7 +5,7 @@ export const SWAGGER_EXAMPLE = {
   participantId: '11111111-2222-4333-8444-555555555555',
   otherParticipantId: '66666666-7777-4888-8999-aaaaaaaaaaaa',
   ruleId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
-  inviteCode: 'Ab12Cd34Ef56',
+  inviteCode: '482193',
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature',
   lineIdToken: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.line-id-token.example',
 } as const;

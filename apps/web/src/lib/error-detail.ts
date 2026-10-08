@@ -13,5 +13,6 @@ export function formatErrorDetail(error: unknown): string | null {
   lines.push(`page: ${window.location.origin}${window.location.pathname}`);
   lines.push(`results liff: ${liffIdFor('results') || '(empty)'}`);
   lines.push(`manage liff: ${liffIdFor('manage') || '(empty)'}`);
+  lines.push(`join liff: ${liffIdFor('join') || '(empty)'}`);
   return lines.join('\n');
 }

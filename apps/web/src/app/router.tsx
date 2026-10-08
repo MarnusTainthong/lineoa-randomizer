@@ -27,6 +27,7 @@ export function createAppRouter() {
         { path: '/manage/:eventId/rules', element: <RulesPage /> },
         { path: '/manage/:eventId/draw', element: <DrawPage /> },
         { path: '/manage/:eventId/guests', element: <GuestResultsPage /> },
+        { path: '/join', element: <JoinPage /> },
         { path: '/join/:inviteCode', element: <JoinPage /> },
       ],
     },

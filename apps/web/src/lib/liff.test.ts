@@ -7,7 +7,7 @@ import {
   openedLiffId,
 } from './liff';
 
-const IDS = { results: 'results-id', manage: 'manage-id' };
+const IDS = { results: 'results-id', manage: 'manage-id', join: 'join-id' };
 
 function contextHash(liffId: string): string {
   const body = btoa(JSON.stringify({ liffId })).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
@@ -26,7 +26,8 @@ describe('liffAppForLocation', () => {
 
   it('reads the path after LINE has rewritten the URL', () => {
     expect(liffAppForLocation('/manage')).toBe('manage');
-    expect(liffAppForLocation('/join/DEMO1234')).toBe('results');
+    expect(liffAppForLocation('/join/DEMO1234')).toBe('join');
+    expect(liffAppForLocation('/', '?liff.state=%2Fjoin')).toBe('join');
   });
 });
 
@@ -42,6 +43,7 @@ describe('liffAppForOpenedLiff', () => {
   it('follows the opened LIFF when the path still belongs to the other app', () => {
     expect(liffAppForOpenedLiff('manage-id', '/results', '', IDS)).toBe('manage');
     expect(liffAppForOpenedLiff('results-id', '/manage', '', IDS)).toBe('results');
+    expect(liffAppForOpenedLiff('join-id', '/results', '', IDS)).toBe('join');
   });
 });
 
@@ -56,13 +58,18 @@ describe('entryPathForLiffOpen', () => {
     expect(entryPathForLiffOpen('/', '?liff.state=%2Fmanage', 'manage-id', IDS)).toBe('/manage');
   });
 
+  it('opens the code form from the join rich menu', () => {
+    expect(entryPathForLiffOpen('/', '', 'join-id', IDS)).toBe('/join');
+    expect(entryPathForLiffOpen('/', '?liff.state=%2Fjoin', 'join-id', IDS)).toBe('/join');
+  });
+
   it('keeps a page LINE already put in the path', () => {
     expect(entryPathForLiffOpen('/results', '', 'results-id', IDS)).toBe('/results');
     expect(entryPathForLiffOpen('/manage/event-1', '', 'manage-id', IDS)).toBe('/manage/event-1');
   });
 
   it('stays on the landing page when one LIFF id is shared by both menus', () => {
-    const shared = { results: 'same-id', manage: 'same-id' };
+    const shared = { results: 'same-id', manage: 'same-id', join: 'same-id' };
     expect(entryPathForLiffOpen('/', '', 'same-id', shared)).toBe('/');
   });
 
@@ -71,6 +78,7 @@ describe('entryPathForLiffOpen', () => {
     expect(entryPathForLiffOpen('/', '', 'manage-id', IDS, true)).toBe('/');
     expect(entryPathForLiffOpen('/results', '', 'results-id', IDS, true)).toBe('/');
     expect(entryPathForLiffOpen('/manage', '', 'manage-id', IDS, true)).toBe('/');
+    expect(entryPathForLiffOpen('/join', '', 'join-id', IDS, true)).toBe('/');
     expect(entryPathForLiffOpen('/manage/event-1', '', 'manage-id', IDS, true)).toBe('/manage/event-1');
   });
 });
