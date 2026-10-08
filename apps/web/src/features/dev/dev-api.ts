@@ -2,7 +2,8 @@ import type { AuthResponse, MockUserView } from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
 export const DEV_IDENTITY_STORAGE_KEY = 'line-oa-randomizer.dev-identity';
-export const REAL_ACCOUNT_IDENTITY = 'real';
+/** Older tabs stored this to sign in with a real LINE account. Dev mode ignores it. */
+const LEGACY_REAL_IDENTITY = 'real';
 
 export const devApi = {
   listMockUsers: () => apiFetch<MockUserView[]>('/dev/mock-users'),
@@ -16,7 +17,9 @@ export const devApi = {
 
 /** Per-tab identity (sessionStorage) so several tabs can be different users at once. */
 export function readDevIdentity(): string | null {
-  return sessionStorage.getItem(DEV_IDENTITY_STORAGE_KEY);
+  const identity = sessionStorage.getItem(DEV_IDENTITY_STORAGE_KEY);
+  if (!identity || identity === LEGACY_REAL_IDENTITY) return null;
+  return identity;
 }
 
 export function writeDevIdentity(identity: string): void {

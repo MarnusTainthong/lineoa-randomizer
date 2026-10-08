@@ -4,10 +4,9 @@ import { Button } from '../../components/ui/button';
 import { ConfirmDialog } from '../../components/ui/dialog';
 import { ErrorState, ListSkeleton } from '../../components/ui/states';
 import { useSnackbar } from '../../components/ui/snackbar';
-import { hasLiffId } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { cn } from '../../lib/utils';
-import { devApi, REAL_ACCOUNT_IDENTITY, selectDevIdentity } from './dev-api';
+import { devApi, selectDevIdentity } from './dev-api';
 import { DevOnlyBanner } from './dev-only-banner';
 
 const AVATAR_STYLES = [
@@ -87,27 +86,19 @@ export function UserPickerPage() {
       </header>
       <DevOnlyBanner />
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-5">
         {mockUsersQuery.isPending && <ListSkeleton />}
         {mockUsersQuery.error && (
           <ErrorState error={mockUsersQuery.error} onRetry={() => void mockUsersQuery.refetch()} />
         )}
         {mockUsersQuery.data && (
           <ul className="divide-y divide-outline-variant overflow-hidden rounded-2xl border border-outline-variant bg-surface-container">
-            {hasLiffId() && (
-              <li>
-                <UserRow
-                  name={TH.dev.realAccount}
-                  onSelect={() => selectDevIdentity(REAL_ACCOUNT_IDENTITY)}
-                />
-              </li>
-            )}
             {users.map((user) => (
               <li key={user.id} id={`mock-user-${user.id}`}>
                 <UserRow name={user.displayName} onSelect={() => selectDevIdentity(user.id)} />
               </li>
             ))}
-            {users.length === 0 && !hasLiffId() && (
+            {users.length === 0 && (
               <li className="px-4 py-10 text-center text-sm text-on-surface-variant">
                 {TH.dev.emptyUsers}
               </li>

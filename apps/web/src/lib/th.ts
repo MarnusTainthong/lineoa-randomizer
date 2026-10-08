@@ -117,7 +117,6 @@ export const TH = {
     addFriendAction: 'เพิ่มเพื่อน',
   },
   dev: {
-    realAccount: 'บัญชี LINE จริง',
     createMock: 'สร้างผู้ใช้ทดสอบ',
     createConfirm: 'เพิ่มผู้ใช้ทดสอบคนใหม่ในรายการ ชื่อจะไล่เป็น user ถัดไป',
     addMocks: 'เพิ่มผู้ใช้ทดสอบเข้าห้อง',

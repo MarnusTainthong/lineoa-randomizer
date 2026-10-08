@@ -2,12 +2,7 @@ import type { AuthResponse } from '@line-oa-randomizer/shared';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Button } from '../components/ui/button';
 import { LoadingIndicator } from '../components/ui/states';
-import {
-  clearDevIdentity,
-  devApi,
-  readDevIdentity,
-  REAL_ACCOUNT_IDENTITY,
-} from '../features/dev/dev-api';
+import { clearDevIdentity, devApi, readDevIdentity } from '../features/dev/dev-api';
 import { UserPickerPage } from '../features/dev/user-picker-page';
 import { ApiError, apiFetch, setAccessToken } from '../lib/api-client';
 import { formatErrorDetail } from '../lib/error-detail';
@@ -33,11 +28,9 @@ async function authenticate(): Promise<AuthState> {
   if (isDevAuthEnabled) {
     const devIdentity = readDevIdentity();
     if (!devIdentity) return { status: 'needs-identity' };
-    if (devIdentity !== REAL_ACCOUNT_IDENTITY) {
-      const auth = await devApi.loginAsMockUser(devIdentity);
-      setAccessToken(auth.accessToken);
-      return { status: 'ready', user: auth.user };
-    }
+    const auth = await devApi.loginAsMockUser(devIdentity);
+    setAccessToken(auth.accessToken);
+    return { status: 'ready', user: auth.user };
   }
 
   const idToken = await getLiffIdToken();
