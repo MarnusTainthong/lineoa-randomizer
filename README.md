@@ -25,6 +25,14 @@ and participants at the same time. The dev toolbar can switch user after you are
 
 Other scripts: `pnpm build`, `pnpm build:api`, `pnpm build:web`, `pnpm test`, `pnpm lint`, `pnpm typecheck`.
 
+## Dev flags
+
+Only the exact string `true` turns a flag on. If a variable is missing, empty, or any other value, it stays off. `.env.example` sets all three to `false`. `DEV_AUTH_ENABLED` is read by the API at startup. The two `VITE_` flags are compiled into the web app by `pnpm build:web`, so changing them means rebuilding.
+
+- `DEV_AUTH_ENABLED` — default off. When `true`, mounts `/api/dev/*` (list and create mock users, log in as one, add mock participants). Off, those routes are not registered and return 404. The API refuses to boot when this is `true` and `NODE_ENV=production`.
+- `VITE_DEV_AUTH` — default off. When `true`, skips LINE login and shows the mock-user picker, dev banner, and user-switch toolbar. Menu links stay on this site instead of opening `liff.line.me`. Needs `DEV_AUTH_ENABLED=true` on the API it calls. Leave it off for stage and production.
+- `VITE_SHOW_ERRORS` — default off. When `true`, adds a diagnostic block on error screens: error name and message, HTTP status and code, page origin and path, and both LIFF ids. The URL hash is omitted because it can hold LINE tokens. This does not enable mock login, so it can stay on for a stage build.
+
 ## LINE setup
 
 1. **Messaging API channel (OA)** → `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`. Webhook URL: `https://<domain>/api/line/webhook`. Turn off OA Manager auto-reply/greeting.
