@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { liffAppForLocation, liffAppForOpenedLiff, liffIdFromLocationHash } from './liff';
+import { liffAppForLocation, liffAppForOpenedLiff, liffIdFromContextToken, openedLiffId } from './liff';
 
 const IDS = { results: 'results-id', manage: 'manage-id' };
 
@@ -24,10 +24,11 @@ describe('liffAppForLocation', () => {
   });
 });
 
-describe('liffIdFromLocationHash', () => {
-  it('reads the LIFF id LINE opened', () => {
-    expect(liffIdFromLocationHash(contextHash('manage-id'))).toBe('manage-id');
-    expect(liffIdFromLocationHash('')).toBeNull();
+describe('openedLiffId', () => {
+  it('reads the LIFF id LINE opened from the hash', () => {
+    expect(liffIdFromContextToken(contextHash('manage-id').replace('#context_token=', ''))).toBe('manage-id');
+    expect(openedLiffId('', contextHash('manage-id'))).toBe('manage-id');
+    expect(openedLiffId('', '')).toBeNull();
   });
 });
 

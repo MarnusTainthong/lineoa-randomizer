@@ -27,9 +27,8 @@ export function liffAppForLocation(pathname: string, search = ''): LiffApp {
   return liffAppForPath(path);
 }
 
-/** LINE puts the opened LIFF id in the `context_token` hash before our code runs. */
-export function liffIdFromLocationHash(hash: string): string | null {
-  const token = new URLSearchParams(hash.replace(/^#/, '')).get('context_token');
+/** LINE puts the opened LIFF id in `context_token` before our code runs. */
+export function liffIdFromContextToken(token: string | null): string | null {
   const segment = token?.split('.')[1];
   if (!segment) return null;
   try {
@@ -43,28 +42,35 @@ export function liffIdFromLocationHash(hash: string): string | null {
   }
 }
 
+export function openedLiffId(search: string, hash: string): string | null {
+  const fromHash = new URLSearchParams(hash.replace(/^#/, '')).get('context_token');
+  const fromSearch = new URLSearchParams(search).get('context_token');
+  return liffIdFromContextToken(fromHash ?? fromSearch);
+}
+
 /** Prefer the LIFF LINE actually opened. Path is only a fallback before that token exists. */
 export function liffAppForOpenedLiff(
-  openedLiffId: string | null,
+  openedId: string | null,
   pathname: string,
   search = '',
   ids: { results: string; manage: string } = LIFF_IDS,
 ): LiffApp {
-  if (openedLiffId && openedLiffId === ids.manage) return 'manage';
-  if (openedLiffId && openedLiffId === ids.results) return 'results';
+  if (openedId && openedId === ids.manage) return 'manage';
+  if (openedId && openedId === ids.results) return 'results';
   return liffAppForLocation(pathname, search);
 }
 
 function currentLiffApp(): LiffApp {
   return liffAppForOpenedLiff(
-    liffIdFromLocationHash(window.location.hash),
+    openedLiffId(window.location.search, window.location.hash),
     window.location.pathname,
     window.location.search,
   );
 }
 
-function isInvalidLiffId(error: unknown): boolean {
-  return error instanceof Error && /invalid liff id/i.test(error.message);
+/** One id only. A failed liff.init() leaves LINE's "Invalid LIFF ID" screen up. */
+function liffIdToInit(): string {
+  return openedLiffId(window.location.search, window.location.hash) || liffIdFor(currentLiffApp());
 }
 
 export function liffIdFor(app: LiffApp): string {
@@ -87,32 +93,22 @@ let initializedLiffId = '';
 let initializingId = '';
 let initPromise: Promise<void> | null = null;
 
-export function initLiff(app: LiffApp = currentLiffApp()): Promise<void> {
-  const liffId = liffIdFor(app);
+export function initLiff(app?: LiffApp): Promise<void> {
+  const liffId = app ? liffIdFor(app) : liffIdToInit();
   if (!liffId) return Promise.reject(new Error('LIFF ID is not configured'));
   if (initializedLiffId) return Promise.resolve();
   if (initPromise && initializingId === liffId) return initPromise;
   initializingId = liffId;
-  const otherId = liffIdFor(app === 'manage' ? 'results' : 'manage');
-  const candidateIds = otherId && otherId !== liffId ? [liffId, otherId] : [liffId];
-  initPromise = (async () => {
-    let lastError: unknown;
-    for (const candidateId of candidateIds) {
-      try {
-        await liff.init({ liffId: candidateId });
-        initializedLiffId = candidateId;
-        return;
-      } catch (error) {
-        lastError = error;
-        if (!isInvalidLiffId(error)) break;
-      }
-    }
-    throw lastError;
-  })().catch((error: unknown) => {
-    initPromise = null;
-    initializingId = '';
-    throw error;
-  });
+  initPromise = liff
+    .init({ liffId })
+    .then(() => {
+      initializedLiffId = liffId;
+    })
+    .catch((error: unknown) => {
+      initPromise = null;
+      initializingId = '';
+      throw error;
+    });
   return initPromise;
 }
 
