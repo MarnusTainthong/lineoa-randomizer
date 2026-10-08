@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { isDevAuthEnabled } from '../../lib/liff';
 import { TH } from '../../lib/th';
+import { useInvalidateEvent } from '../events/use-events';
 import { devApi } from './dev-api';
 
 /** Slim bar on inner pages so a test session still shows who is logged in. */
@@ -13,10 +14,13 @@ export function DevToolbar() {
   const showSnackbar = useSnackbar();
   const { pathname } = useLocation();
   const eventId = /\/manage\/([^/]+)/.exec(pathname)?.[1];
+  const invalidateEvent = useInvalidateEvent();
   const addMockParticipants = useMutation({
     mutationFn: (count: number) => devApi.addMockParticipants(eventId as string, count),
-    onSuccess: () => window.location.reload(),
-    onError: (error) => showSnackbar(error.message),
+    onSuccess: () => invalidateEvent(eventId),
+    onError: (error: unknown) => {
+      showSnackbar(error instanceof Error ? error.message : TH.common.errorTitle);
+    },
   });
 
   if (!isDevAuthEnabled) return null;

@@ -2,5 +2,9 @@
 # still sees /results and /manage.
 # Wildcard rules that point at /index.html are rejected: Cloudflare strips
 # ".html" and "/index", then the wildcard matches again.
+# Nested pages rewrite to the copied html files instead, so a refresh of
+# /manage/:id still loads the app.
 /results /index.html 200
 /manage /index.html 200
+/results/* /results.html 200
+/manage/* /manage.html 200

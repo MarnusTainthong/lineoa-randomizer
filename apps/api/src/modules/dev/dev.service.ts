@@ -55,16 +55,18 @@ export class DevService {
     if (event.status !== EVENT_STATUS.OPEN)
       throw new DomainError('EVENT_NOT_OPEN', 'จับสลากไปแล้ว');
 
-    const mockUsers = await this.prisma.user.findMany({ where: { isMockUser: true } });
+    const mockUsers = await this.prisma.user.findMany({
+      where: { isMockUser: true },
+      orderBy: { createdAt: 'asc' },
+    });
     const joinedUserIds = new Set(
       (await this.prisma.participant.findMany({ where: { eventId } })).map(
         (participant) => participant.userId,
       ),
     );
     const usersToAdd = mockUsers.filter((user) => !joinedUserIds.has(user.id)).slice(0, count);
-    while (usersToAdd.length < count) {
-      const created = await this.createMockUser();
-      usersToAdd.push(await this.prisma.user.findUniqueOrThrow({ where: { id: created.id } }));
+    if (usersToAdd.length === 0) {
+      throw new DomainError('NO_MOCK_USERS', 'ไม่มีผู้ใช้ทดสอบที่ยังไม่ได้เข้าห้อง');
     }
 
     await this.prisma.$transaction(async (transaction) => {
