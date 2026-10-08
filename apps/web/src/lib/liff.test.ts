@@ -65,4 +65,12 @@ describe('entryPathForLiffOpen', () => {
     const shared = { results: 'same-id', manage: 'same-id' };
     expect(entryPathForLiffOpen('/', '', 'same-id', shared)).toBe('/');
   });
+
+  it('opens the landing page from either LIFF when every dev flag is on', () => {
+    expect(entryPathForLiffOpen('/', '?liff.state=%2Fresults', 'results-id', IDS, true)).toBe('/');
+    expect(entryPathForLiffOpen('/', '', 'manage-id', IDS, true)).toBe('/');
+    expect(entryPathForLiffOpen('/results', '', 'results-id', IDS, true)).toBe('/');
+    expect(entryPathForLiffOpen('/manage', '', 'manage-id', IDS, true)).toBe('/');
+    expect(entryPathForLiffOpen('/manage/event-1', '', 'manage-id', IDS, true)).toBe('/manage/event-1');
+  });
 });

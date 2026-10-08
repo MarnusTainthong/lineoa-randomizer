@@ -33,6 +33,8 @@ Only the exact string `true` turns a flag on. If a variable is missing, empty, o
 - `VITE_DEV_AUTH` — default off. When `true`, skips LINE login and shows the mock-user picker, dev banner, and user-switch toolbar. Menu links stay on this site instead of opening `liff.line.me`. Needs `DEV_AUTH_ENABLED=true` on the API it calls. Leave it off for stage and production.
 - `VITE_SHOW_ERRORS` — default off. When `true`, adds a diagnostic block on error screens: error name and message, HTTP status and code, page origin and path, and both LIFF ids. The URL hash is omitted because it can hold LINE tokens. This does not enable mock login, so it can stay on for a stage build.
 
+When `VITE_DEV_AUTH` and `VITE_SHOW_ERRORS` are both `true`, the results LIFF and the manage LIFF both open `/` (the main page) instead of `/results` or `/manage`. One flag left off keeps the normal menu paths. `DEV_AUTH_ENABLED` still has to be `true` on that API for the mock-user picker on `/` to sign in.
+
 ## LINE setup
 
 1. **Messaging API channel (OA)** → `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`. Webhook URL: `https://<domain>/api/line/webhook`. Turn off OA Manager auto-reply/greeting.

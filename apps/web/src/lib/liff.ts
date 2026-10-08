@@ -10,6 +10,9 @@ export type LiffApp = keyof typeof LIFF_IDS;
 
 export const isDevAuthEnabled = import.meta.env.VITE_DEV_AUTH === 'true';
 
+/** Both web flags on: either LIFF opens `/` instead of its menu. */
+export const openMainPage = isDevAuthEnabled && import.meta.env.VITE_SHOW_ERRORS === 'true';
+
 /** `/manage` belongs to the manage LIFF. Results and join use the results LIFF. */
 export function liffAppForPath(pathname: string): LiffApp {
   return pathname.startsWith('/manage') ? 'manage' : 'results';
@@ -65,13 +68,16 @@ export function liffAppForOpenedLiff(
  * An endpoint path such as `/results` stays as it is.
  * On `/`, `liff.state` is the path from the LIFF URL. If that is missing,
  * the opened LIFF id picks `/results` or `/manage`.
+ * When both dev flags are on, either menu home opens `/`.
  */
 export function entryPathForLiffOpen(
   pathname: string,
   search: string,
   openedId: string | null,
   ids: { results: string; manage: string } = LIFF_IDS,
+  landOnMain = false,
 ): string {
+  if (landOnMain && isLiffMenuHome(pathname)) return '/';
   if (pathname !== '/') return `${pathname}${search}`;
 
   const fromState = pathFromLiffState(search);
@@ -81,6 +87,11 @@ export function entryPathForLiffOpen(
   if (app === 'manage') return '/manage';
   if (app === 'results') return '/results';
   return `${pathname}${search}`;
+}
+
+/** Rich-menu homes. Deeper paths such as `/manage/:id` stay put. */
+function isLiffMenuHome(pathname: string): boolean {
+  return pathname === '/' || pathname === '/results' || pathname === '/manage';
 }
 
 function pathFromLiffState(search: string): string | null {
@@ -172,6 +183,20 @@ function applyLiffEntryPath(): void {
  * after the router would already have captured `/`.
  */
 export async function prepareLiffEntry(): Promise<void> {
+  if (openMainPage) {
+    const target = entryPathForLiffOpen(
+      window.location.pathname,
+      window.location.search,
+      openedLiffId(window.location.search, window.location.hash),
+      LIFF_IDS,
+      true,
+    );
+    const current = `${window.location.pathname}${window.location.search}`;
+    if (target !== current || window.location.hash) {
+      window.history.replaceState(window.history.state, '', target);
+    }
+    return;
+  }
   if (isDevAuthEnabled || !hasLiffId()) return;
   await initLiff();
 }
