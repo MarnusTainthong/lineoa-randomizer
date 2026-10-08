@@ -1,4 +1,4 @@
-import { formatInviteCode, type EventDetail, type ParticipantView } from '@line-oa-randomizer/shared';
+import { formatInviteCode, normalizeInviteCode, type EventDetail, type ParticipantView } from '@line-oa-randomizer/shared';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -53,29 +53,18 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           <p className="text-sm font-medium text-on-surface-variant">{TH.join.codeLabel}</p>
           <p className="mt-1 text-3xl font-bold tracking-[0.2em]">{formatInviteCode(event.inviteCode)}</p>
           <p className="mt-1 text-sm text-on-surface-variant">{TH.join.shareHint}</p>
-          <div className="mt-3 flex gap-2">
-            <Button
-              variant="tonal"
-              className="flex-1"
-              onClick={() => {
-                void navigator.clipboard.writeText(formatInviteCode(event.inviteCode)).then(
-                  () => showSnackbar(TH.join.copied),
-                  () => showSnackbar(TH.common.errorTitle),
-                );
-              }}
-            >
-              {TH.join.copy}
-            </Button>
-            <Button
-              variant="outlined"
-              className="flex-1"
-              onClick={() =>
-                void shareToChat(TH.join.shareMessage(event.name, formatInviteCode(event.inviteCode)))
-              }
-            >
-              {TH.join.share}
-            </Button>
-          </div>
+          <Button
+            variant="tonal"
+            className="mt-3 w-full"
+            onClick={() => {
+              void navigator.clipboard.writeText(normalizeInviteCode(event.inviteCode)).then(
+                () => showSnackbar(TH.join.copied),
+                () => showSnackbar(TH.common.errorTitle),
+              );
+            }}
+          >
+            {TH.join.copy}
+          </Button>
         </section>
       )}
 
