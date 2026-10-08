@@ -32,19 +32,34 @@ export function liffEntryUrl(app: LiffApp): string | null {
 }
 
 let initializedLiffId = '';
+let initializingId = '';
+let initPromise: Promise<void> | null = null;
 
-export async function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)): Promise<void> {
+export function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)): Promise<void> {
   const liffId = liffIdFor(app);
-  if (!liffId) throw new Error('LIFF ID is not configured');
-  if (initializedLiffId === liffId) return;
-  await liff.init({ liffId });
-  initializedLiffId = liffId;
+  if (!liffId) return Promise.reject(new Error('LIFF ID is not configured'));
+  if (initializedLiffId === liffId) return Promise.resolve();
+  if (initPromise && initializingId === liffId) return initPromise;
+  initializingId = liffId;
+  initPromise = liff
+    .init({ liffId, withLoginOnExternalBrowser: true })
+    .then(() => {
+      initializedLiffId = liffId;
+    })
+    .catch((error: unknown) => {
+      initPromise = null;
+      initializingId = '';
+      throw error;
+    });
+  return initPromise;
 }
 
 export async function getLiffIdToken(): Promise<string | null> {
   await initLiff();
   if (!liff.isLoggedIn()) {
-    liff.login({ redirectUri: window.location.href });
+    // No redirectUri: the current URL often includes liff.state or OAuth params.
+    // Passing that URL makes the LINE in-app browser stay on a white screen.
+    liff.login();
     return null; // page navigates away
   }
   return liff.getIDToken();
