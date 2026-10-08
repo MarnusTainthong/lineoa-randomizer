@@ -15,7 +15,11 @@ export const TextField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLIn
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-on-surface-variant">{label}</span>
         <input ref={ref} className={cn(CONTROL_CLASSES, 'min-h-12', className)} {...props} />
-        {error && <span className="mt-1 block text-xs text-error">{error}</span>}
+        {error && (
+          <span role="alert" className="mt-1 block text-xs text-error">
+            {error}
+          </span>
+        )}
       </label>
     );
   },

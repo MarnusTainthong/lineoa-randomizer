@@ -7,6 +7,7 @@ import { TextField } from '../../components/ui/field';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { LoadingIndicator, PanelSkeleton, QueryBoundary } from '../../components/ui/states';
+import { ApiError } from '../../lib/api-client';
 import { isOaFriend } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { eventsApi } from './events-api';
@@ -86,8 +87,11 @@ function JoinRoom({ code }: { code: string }) {
 
 function JoinCodeForm() {
   const navigate = useNavigate();
+  const joinEvent = useJoinEvent();
   const [rawCode, setRawCode] = useState('');
   const [rejected, setRejected] = useState(false);
+  const [roomError, setRoomError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const code = normalizeInviteCode(rawCode);
 
   return (
@@ -96,7 +100,33 @@ function JoinCodeForm() {
         className="space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
-          if (isInviteCode(code)) navigate(`/join/${code}`);
+          if (!isInviteCode(code) || pending) return;
+          setPending(true);
+          setRoomError(null);
+          void eventsApi
+            .previewInvite(code)
+            .then(async (preview) => {
+              if (preview.isAlreadyJoined) {
+                setRoomError(TH.join.already);
+                return;
+              }
+              if (preview.status !== 'OPEN') {
+                setRoomError(TH.join.closed);
+                return;
+              }
+              await joinEvent.mutateAsync(code);
+              navigate(`/results/${preview.eventId}`, { replace: true });
+            })
+            .catch((error: unknown) => {
+              setRoomError(
+                error instanceof ApiError && error.status === 404
+                  ? TH.join.notFound
+                  : error instanceof Error
+                    ? error.message
+                    : TH.common.errorTitle,
+              );
+            })
+            .finally(() => setPending(false));
         }}
       >
         <p className="text-sm text-on-surface-variant">{TH.join.hint}</p>
@@ -110,15 +140,16 @@ function JoinCodeForm() {
           spellCheck={false}
           maxLength={6}
           placeholder={TH.join.placeholder}
-          error={rejected ? TH.join.invalid : undefined}
+          error={rejected ? TH.join.invalid : (roomError ?? undefined)}
           className="text-center text-2xl font-bold tracking-[0.3em]"
           onChange={(event) => {
             const value = event.target.value.toUpperCase();
             setRejected(/[^A-Z0-9\s]/.test(value));
+            setRoomError(null);
             setRawCode(value.replace(/[^A-Z0-9]/g, '').slice(0, 6));
           }}
         />
-        <Button type="submit" className="w-full" disabled={!isInviteCode(code)}>
+        <Button type="submit" className="w-full" loading={pending} disabled={!isInviteCode(code)}>
           {TH.join.action}
         </Button>
       </form>
