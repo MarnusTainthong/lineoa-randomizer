@@ -1,12 +1,12 @@
 # Rich menu opens these exact paths. Status 200 keeps the URL so React Router
-# still sees /results and /manage.
+# still sees /results, /manage, and /join.
 # Wildcard rules that point at /index.html are rejected: Cloudflare strips
 # ".html" and "/index", then the wildcard matches again.
 # Nested pages rewrite to the copied html files instead, so a refresh of
 # /manage/:id still loads the app.
 /results /index.html 200
 /manage /index.html 200
-/join /join.html 200
+/join /index.html 200
 /results/* /results.html 200
 /manage/* /manage.html 200
 /join/* /join.html 200
