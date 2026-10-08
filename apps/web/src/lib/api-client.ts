@@ -23,14 +23,22 @@ function isApiErrorBody(value: unknown): value is Partial<ApiErrorBody> {
 }
 
 export async function apiFetch<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: init.method ?? 'GET',
-    headers: {
-      ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
-  });
+  const url = `${API_URL}${path}`;
+  const method = init.method ?? 'GET';
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method,
+      headers: {
+        ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'Load failed';
+    throw new ApiError(0, 'NETWORK', `${reason} (${method} ${url})`);
+  }
 
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => null);

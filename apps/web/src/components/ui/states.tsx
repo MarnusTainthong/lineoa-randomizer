@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { formatErrorDetail } from '../../lib/error-detail';
 import { TH } from '../../lib/th';
 import { Button } from './button';
 
@@ -79,10 +80,16 @@ export function EmptyState({ message, action }: { message: string; action?: Reac
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const message = error instanceof Error ? error.message : TH.common.errorTitle;
+  const detail = formatErrorDetail(error);
   return (
     <div className="flex flex-col items-center gap-3 py-12 text-center">
       <p className="font-medium text-error">{TH.common.errorTitle}</p>
       <p className="text-sm text-on-surface-variant">{message}</p>
+      {detail && (
+        <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-all text-left text-xs text-on-surface-variant">
+          {detail}
+        </pre>
+      )}
       {onRetry && (
         <Button variant="tonal" onClick={onRetry}>
           {TH.common.retry}
