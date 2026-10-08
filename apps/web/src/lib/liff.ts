@@ -42,7 +42,7 @@ export function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)
   if (initPromise && initializingId === liffId) return initPromise;
   initializingId = liffId;
   initPromise = liff
-    .init({ liffId, withLoginOnExternalBrowser: true })
+    .init({ liffId })
     .then(() => {
       initializedLiffId = liffId;
     })
@@ -54,15 +54,20 @@ export function initLiff(app: LiffApp = liffAppForPath(window.location.pathname)
   return initPromise;
 }
 
+/** Endpoint path only. Query and hash (liff.state, OAuth code) make LINE's in-app browser go blank. */
+function loginRedirectUri(): string {
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
 export async function getLiffIdToken(): Promise<string | null> {
   await initLiff();
   if (!liff.isLoggedIn()) {
-    // No redirectUri: the current URL often includes liff.state or OAuth params.
-    // Passing that URL makes the LINE in-app browser stay on a white screen.
-    liff.login();
+    liff.login({ redirectUri: loginRedirectUri() });
     return null; // page navigates away
   }
-  return liff.getIDToken();
+  const idToken = liff.getIDToken();
+  if (!idToken) throw new Error('LINE did not return an ID token');
+  return idToken;
 }
 
 export function isInLineApp(): boolean {

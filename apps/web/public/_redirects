@@ -1,0 +1,8 @@
+# Rich menu opens /results and /manage. Proxy them to the app shell.
+# Status 200 keeps the path, so React Router still sees /results.
+# Do not use "/* /index.html 200": Workers rejects that as an infinite loop.
+/results /index.html 200
+/manage /index.html 200
+/results/* /index.html 200
+/manage/* /index.html 200
+/join/* /index.html 200
