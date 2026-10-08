@@ -115,7 +115,8 @@ function appForUniqueLiffId(openedId: string | null, ids: LiffIds): LiffApp | nu
   const matches = (['results', 'manage', 'join'] as const).filter(
     (app) => ids[app].length > 0 && openedId === ids[app],
   );
-  return matches.length === 1 ? matches[0] : null;
+  const match = matches[0];
+  return matches.length === 1 && match ? match : null;
 }
 
 function currentLiffApp(): LiffApp {
