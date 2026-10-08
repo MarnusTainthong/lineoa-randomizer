@@ -30,11 +30,11 @@ Other scripts: `pnpm build`, `pnpm build:api`, `pnpm build:web`, `pnpm test`, `p
 1. **Messaging API channel (OA)** → `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`. Webhook URL: `https://<domain>/api/line/webhook`. Turn off OA Manager auto-reply/greeting.
 2. **LINE Login channel** → `LINE_LOGIN_CHANNEL_ID`. Link the OA to it (bot link).
 3. **Two LIFF apps** (same LINE Login channel): size Full, scope `profile openid`, bot link on, endpoint URL = web root.
-   - See results → `VITE_LIFF_ID_RESULTS`. Rich menu / keyword opens `https://liff.line.me/<id>/results`.
+   - See results → `VITE_LIFF_ID_RESULTS`. Opens `https://liff.line.me/<id>/results`.
    - Manage → `VITE_LIFF_ID_MANAGE`. Opens `https://liff.line.me/<id>/manage`.
    `VITE_LIFF_ID` is used for both when a specific id is empty.
-4. **Rich menu**: put a 2500×843 PNG (two halves) at `apps/api/scripts/richmenu.png`, then `pnpm line:setup-richmenu`.
-   Left opens the results LIFF, right opens the manage LIFF.
+4. **Rich menu**: create it in LINE Official Account Manager. This repo does not create or upload a menu.
+   Left button: `https://liff.line.me/<VITE_LIFF_ID_RESULTS>/results`. Right button: `https://liff.line.me/<VITE_LIFF_ID_MANAGE>/manage`.
 5. Local testing with real LINE: run a tunnel (ngrok / cloudflared) and use it for the webhook and LIFF endpoint URL.
    Keep the LIFF app in Development status and add testers.
 

@@ -7,7 +7,7 @@ import { defineConfig, type Plugin } from 'vite';
 
 const webRoot = dirname(fileURLToPath(import.meta.url));
 
-/** Rich menu opens /results and /manage. Static hosting serves results.html for /results. */
+/** LIFF entry paths. Static hosting serves results.html for /results. */
 function richMenuHtml(): Plugin {
   return {
     name: 'rich-menu-html',
