@@ -7,7 +7,7 @@ import { DevOnlyBanner } from '../dev/dev-only-banner';
 
 const MENUS: {
   app: LiffApp;
-  to: '/results' | '/manage';
+  to: '/results' | '/manage' | '/join';
   title: string;
   hint: string;
   icon: string;
@@ -29,9 +29,17 @@ const MENUS: {
     icon: 'tune',
     tile: 'bg-secondary text-on-secondary',
   },
+  {
+    app: 'join',
+    to: '/join',
+    title: TH.join.title,
+    hint: TH.landing.joinHint,
+    icon: 'key',
+    tile: 'bg-tertiary text-on-surface',
+  },
 ];
 
-function menuDestination(app: LiffApp, path: '/results' | '/manage'): string {
+function menuDestination(app: LiffApp, path: '/results' | '/manage' | '/join'): string {
   if (isDevAuthEnabled || isInLineApp()) return path;
   return liffEntryUrl(app) ?? path;
 }
@@ -96,7 +104,11 @@ export function LandingPage() {
             return (
               <li key={menu.to}>
                 {destination.startsWith('/') ? (
-                  <Link to={destination} className={className}>
+                  <Link
+                    to={destination}
+                    state={menu.to === '/join' ? { from: 'home' } : undefined}
+                    className={className}
+                  >
                     {body}
                   </Link>
                 ) : (

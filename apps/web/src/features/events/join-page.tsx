@@ -1,7 +1,7 @@
 import { normalizeInviteCode } from '@line-oa-randomizer/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { TextField } from '../../components/ui/field';
 import { Page } from '../../components/ui/page';
@@ -86,11 +86,13 @@ function JoinRoom({ code }: { code: string }) {
 
 function JoinCodeForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [rawCode, setRawCode] = useState('');
   const code = normalizeInviteCode(rawCode);
+  const backTo = location.state?.from === 'home' ? '/' : '/results';
 
   return (
-    <Page title={TH.join.title} backTo="/results">
+    <Page title={TH.join.title} backTo={backTo}>
       <form
         className="space-y-4"
         onSubmit={(event) => {
