@@ -18,4 +18,7 @@ ENV NODE_ENV=production
 COPY --from=build /repo /repo
 WORKDIR /repo/apps/api
 EXPOSE 3000
-CMD ["sh", "-c", "cd /repo/apps/api && pnpm exec prisma migrate deploy && node dist/main.js"]
+# One executable. Railway does not run a custom start command in a shell, so
+# `prisma migrate deploy && node ...` never starts the API and the healthcheck
+# stays "service unavailable". Migrations run in main.ts after the port is open.
+CMD ["node", "dist/main.js"]

@@ -3,6 +3,8 @@ import 'reflect-metadata';
 import { config as loadDotenv } from 'dotenv';
 loadDotenv({ path: ['.env', '../../.env'] });
 
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,6 +13,24 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { DomainErrorFilter } from './common/domain-error.filter';
 import { validateEnv } from './config/env.validation';
+import { PrismaService } from './prisma/prisma.service';
+
+const nodeRequire = createRequire(__filename);
+
+function deployMigrations(): Promise<void> {
+  const prismaCli = nodeRequire.resolve('prisma/build/index.js');
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [prismaCli, 'migrate', 'deploy'], {
+      stdio: 'inherit',
+      env: process.env,
+    });
+    child.on('error', reject);
+    child.on('exit', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`prisma migrate deploy failed with exit code ${code ?? 'null'}`));
+    });
+  });
+}
 
 async function bootstrap(): Promise<void> {
   const env = validateEnv(process.env);
@@ -36,6 +56,15 @@ async function bootstrap(): Promise<void> {
   }
 
   await app.listen(env.PORT, '0.0.0.0');
+  console.log(`API listening on 0.0.0.0:${env.PORT}`);
+
+  if (env.NODE_ENV === 'production') {
+    await deployMigrations();
+    await app.get(PrismaService).$connect();
+  }
 }
 
-void bootstrap();
+void bootstrap().catch((error: unknown) => {
+  console.error(error);
+  process.exit(1);
+});
