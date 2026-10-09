@@ -36,17 +36,22 @@ export const ResultCard = forwardRef<HTMLDivElement, ResultCardProps>(function R
       <div aria-hidden className="absolute inset-x-0 top-[calc(50%-1.125rem)] h-9 bg-secondary" />
       <div aria-hidden className="absolute inset-y-0 left-[calc(50%-1.125rem)] w-9 bg-secondary" />
 
-      <div className="absolute inset-10 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-[var(--surface-bright)] px-5 pt-6 text-center text-on-surface">
-        <span className="absolute left-[calc(50%-1.375rem)] top-[-1.375rem] flex size-11 items-center justify-center rounded-full bg-[var(--tertiary)] text-on-primary">
+      <div className="absolute inset-10 z-20 rounded-2xl bg-[var(--surface-bright)] text-on-surface">
+        <span className="absolute left-[calc(50%-1.375rem)] top-[-1.375rem] z-10 flex size-11 items-center justify-center rounded-full bg-[var(--tertiary)] text-on-primary">
           <GiftSeal />
         </span>
-        <p className="text-sm font-medium text-on-surface-variant">{eventName}</p>
-        <p className="text-sm font-medium text-secondary">{caption}</p>
-        <p className="break-words text-4xl font-bold leading-tight text-primary">{receiverName}</p>
-        <p className="text-xs text-on-surface-variant">
-          {TH.common.round} {drawVersion}
-          {isReplaced && ` · ${TH.results.replaced}`}
-        </p>
+        {/* Table centering keeps the same text position in the saved image. Flex does not. */}
+        <div className="table h-full w-full">
+          <div className="table-cell px-5 align-middle text-center">
+            <p className="text-sm font-medium text-on-surface-variant">{eventName}</p>
+            <p className="mt-3 text-sm font-medium text-secondary">{caption}</p>
+            <p className="mt-3 break-words text-4xl font-bold leading-tight text-primary">{receiverName}</p>
+            <p className="mt-3 text-xs text-on-surface-variant">
+              {TH.common.round} {drawVersion}
+              {isReplaced && ` · ${TH.results.replaced}`}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

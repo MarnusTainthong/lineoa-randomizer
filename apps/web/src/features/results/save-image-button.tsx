@@ -6,6 +6,48 @@ import { useSnackbar } from '../../components/ui/snackbar';
 import { isInLineApp } from '../../lib/liff';
 import { TH } from '../../lib/th';
 
+const PAINT_PROPERTIES = [
+  'backgroundColor',
+  'backgroundImage',
+  'backgroundSize',
+  'backgroundRepeat',
+  'backgroundPosition',
+  'color',
+  'fill',
+  'opacity',
+  'borderTopColor',
+  'borderRightColor',
+  'borderBottomColor',
+  'borderLeftColor',
+  'borderTopWidth',
+  'borderRightWidth',
+  'borderBottomWidth',
+  'borderLeftWidth',
+  'borderRadius',
+  'fontFamily',
+  'fontSize',
+  'fontWeight',
+  'lineHeight',
+  'textAlign',
+] as const;
+
+/**
+ * The image capture copies styles into an SVG that does not have this app's
+ * CSS variables. Write the used colors and the font onto the clone first.
+ */
+function bakePaintStyles(source: HTMLElement, clone: HTMLElement): void {
+  const sources = [source, ...source.querySelectorAll<HTMLElement>('*')];
+  const clones = [clone, ...clone.querySelectorAll<HTMLElement>('*')];
+  sources.forEach((node, index) => {
+    const target = clones[index];
+    if (!target) return;
+    const computed = getComputedStyle(node);
+    for (const property of PAINT_PROPERTIES) {
+      target.style[property] = computed[property];
+    }
+  });
+}
+
 async function dataUrlToFile(dataUrl: string, fileName: string): Promise<File> {
   const blob = await (await fetch(dataUrl)).blob();
   return new File([blob], fileName, { type: 'image/png' });
@@ -30,10 +72,24 @@ export function SaveImageButton({
     if (!targetRef.current) return;
     setIsBusy(true);
     try {
-      // Wait for Noto Sans Thai. cacheBust rewrites font file URLs, so the
-      // snapshot falls back to another face and Thai text sits lower than on screen.
       await document.fonts.ready;
-      const dataUrl = await toPng(targetRef.current, { pixelRatio: 2 });
+      const source = targetRef.current;
+      const bounds = source.getBoundingClientRect();
+      const host = document.createElement('div');
+      host.setAttribute('aria-hidden', 'true');
+      host.style.cssText = `position:fixed;left:-10000px;top:0;width:${bounds.width}px;height:${bounds.height}px;pointer-events:none;`;
+      const clone = source.cloneNode(true) as HTMLElement;
+      clone.style.width = `${bounds.width}px`;
+      clone.style.height = `${bounds.height}px`;
+      bakePaintStyles(source, clone);
+      host.appendChild(clone);
+      document.body.appendChild(host);
+      let dataUrl: string;
+      try {
+        dataUrl = await toPng(clone, { pixelRatio: 2, skipFonts: false });
+      } finally {
+        host.remove();
+      }
       const file = await dataUrlToFile(dataUrl, fileName);
 
       if (navigator.canShare?.({ files: [file] })) {
