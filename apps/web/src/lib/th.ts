@@ -66,7 +66,7 @@ export const TH = {
     addGuestsNotice: 'ผู้จัดจะเห็นผลการจับของคนกลุ่มนี้',
     rules: 'กติกา',
     guestResults: 'ผลของคนที่ไม่มี LINE',
-    draw: 'จับสลาก',
+    draw: 'ทำการสุ่ม',
     redraw: 'สุ่มใหม่',
     close: 'ปิดห้อง',
     closeConfirm:

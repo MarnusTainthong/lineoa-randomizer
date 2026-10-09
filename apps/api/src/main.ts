@@ -59,7 +59,9 @@ async function bootstrap(): Promise<void> {
   await app.listen(env.PORT, '0.0.0.0');
   console.log(`API listening on 0.0.0.0:${env.PORT}`);
 
-  if (env.NODE_ENV === 'production') {
+  // Railway dev uses NODE_ENV=staging, so a production-only check never applied
+  // new migrations and requests failed with a missing column.
+  if (env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT_NAME) {
     await deployMigrations();
     await app.get(PrismaService).$connect();
   }
