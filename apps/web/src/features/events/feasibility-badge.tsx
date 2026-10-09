@@ -35,21 +35,23 @@ export function FeasibilityBanner({
 /** Status chips, then the error banner, directly under a page header. */
 export function EventStatusBlock({
   event,
+  drawnLabel = TH.status.DRAWN,
 }: {
   event: Pick<EventDetail, 'status' | 'feasibility' | 'feasibilityReason' | 'currentDrawVersion'>;
+  drawnLabel?: string;
 }) {
   const isDrawn = event.status === 'DRAWN';
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Chip tone={isDrawn ? 'primary' : 'neutral'}>{TH.status[event.status]}</Chip>
+        <Chip tone={isDrawn ? 'primary' : 'neutral'}>
+          {isDrawn ? drawnLabel : TH.status[event.status]}
+        </Chip>
         {event.status === 'OPEN' && event.feasibility === 'OK' && (
           <FeasibilityBadge feasibility={event.feasibility} />
         )}
         {event.currentDrawVersion > 0 && (
-          <Chip>
-            {TH.common.round} {event.currentDrawVersion}
-          </Chip>
+          <Chip>{TH.manage.drawCount(event.currentDrawVersion)}</Chip>
         )}
       </div>
       <FeasibilityBanner event={event} />

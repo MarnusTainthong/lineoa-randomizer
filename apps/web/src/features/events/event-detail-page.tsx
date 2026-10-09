@@ -7,46 +7,33 @@ import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { QueryBoundary } from '../../components/ui/states';
 import { Switch } from '../../components/ui/switch';
-import { shareTextToChat } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { AddGuestsDialog } from './add-guests-dialog';
 import { EventStatusBlock } from './feasibility-badge';
 import { ParticipantList } from './participant-list';
-import { useEventDetail, useRemoveParticipant, useUpdateEvent } from './use-events';
-
-function useShareToChat() {
-  const showSnackbar = useSnackbar();
-  return async (text: string) => {
-    try {
-      const isShared = await shareTextToChat(text);
-      if (!isShared) {
-        await navigator.clipboard.writeText(text);
-        showSnackbar('คัดลอกข้อความแล้ว');
-      }
-    } catch {
-      showSnackbar(TH.common.errorTitle);
-    }
-  };
-}
+import { useDraw, useEventDetail, useRemoveParticipant, useUpdateEvent } from './use-events';
 
 function EventDetailContent({ event }: { event: EventDetail }) {
   const navigate = useNavigate();
   const showSnackbar = useSnackbar();
-  const shareToChat = useShareToChat();
   const updateEvent = useUpdateEvent(event.id);
   const removeParticipant = useRemoveParticipant(event.id);
+  const redraw = useDraw(event.id, true);
   const [isAddingGuests, setIsAddingGuests] = useState(false);
   const [participantToRemove, setParticipantToRemove] = useState<ParticipantView | null>(null);
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [isConfirmingRedraw, setIsConfirmingRedraw] = useState(false);
 
   const isOpen = event.status === 'OPEN';
   const isDrawn = event.status === 'DRAWN';
+  const isClosed = event.status === 'CLOSED';
   const canDraw = event.feasibility === 'OK' && (isOpen || isDrawn);
   const hasGuests = event.participants.some((participant) => participant.isGuest);
 
   return (
     <>
       <EventStatusBlock event={event} />
+      {isClosed && <p className="text-sm text-on-surface-variant">{TH.manage.closedHint}</p>}
 
       {isOpen && (
         <section className="rounded-2xl border border-outline-variant bg-surface-container px-4 py-4 text-center">
@@ -96,7 +83,7 @@ function EventDetailContent({ event }: { event: EventDetail }) {
           label={TH.manage.allowViewAll}
           hint={TH.manage.allowViewAllHint}
           checked={event.allowViewAllResults}
-          disabled={updateEvent.isPending}
+          disabled={updateEvent.isPending || isClosed}
           onChange={(allowViewAllResults) =>
             updateEvent.mutate(
               { allowViewAllResults },
@@ -119,29 +106,34 @@ function EventDetailContent({ event }: { event: EventDetail }) {
             </Button>
           </Link>
         )}
-        {isDrawn && (
+        {!isClosed && isDrawn && (
           <Button
-            variant="outlined"
-            icon="campaign"
-            onClick={() => void shareToChat(TH.manage.announceMessage)}
+            variant="filled"
+            icon="redeem"
+            disabled={!canDraw}
+            onClick={() => setIsConfirmingRedraw(true)}
           >
-            {TH.manage.announce}
+            {TH.manage.redraw}
           </Button>
         )}
-        <Button
-          variant="filled"
-          icon="redeem"
-          disabled={!canDraw}
-          onClick={() => navigate(`/manage/${event.id}/draw`)}
-        >
-          {isDrawn ? TH.manage.redraw : TH.manage.draw}
-        </Button>
+        {!isClosed && !isDrawn && (
+          <Button
+            variant="filled"
+            icon="redeem"
+            disabled={!canDraw}
+            onClick={() => navigate(`/manage/${event.id}/draw`)}
+          >
+            {TH.manage.draw}
+          </Button>
+        )}
         {!canDraw && isOpen && event.feasibility === 'TOO_FEW_PARTICIPANTS' && (
           <p className="text-center text-xs text-on-surface-variant">{TH.manage.notEnough}</p>
         )}
-        <Button variant="danger" className="w-full" onClick={() => setIsConfirmingClose(true)}>
-          {TH.manage.close}
-        </Button>
+        {!isClosed && (
+          <Button variant="danger" className="w-full" onClick={() => setIsConfirmingClose(true)}>
+            {TH.manage.close}
+          </Button>
+        )}
       </div>
 
       {isAddingGuests && (
@@ -172,10 +164,28 @@ function EventDetailContent({ event }: { event: EventDetail }) {
             updateEvent.mutate(
               { status: 'CLOSED' },
               {
-                onSuccess: () => navigate('/manage', { replace: true }),
+                onSuccess: () => setIsConfirmingClose(false),
                 onError: (error) => showSnackbar(error.message),
               },
             )
+          }
+        />
+      )}
+      {isConfirmingRedraw && (
+        <ConfirmDialog
+          title={TH.manage.redraw}
+          message={TH.draw.confirmRedraw}
+          confirmLabel={TH.manage.redraw}
+          isBusy={redraw.isPending}
+          onClose={() => setIsConfirmingRedraw(false)}
+          onConfirm={() =>
+            redraw.mutate(undefined, {
+              onSuccess: () => {
+                setIsConfirmingRedraw(false);
+                showSnackbar(TH.draw.done);
+              },
+              onError: (error) => showSnackbar(error.message),
+            })
           }
         />
       )}

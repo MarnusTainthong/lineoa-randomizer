@@ -1,3 +1,4 @@
+import { formatInviteCode } from '@line-oa-randomizer/shared';
 import { Link } from 'react-router-dom';
 import { Chip } from '../../components/ui/chip';
 import { Page } from '../../components/ui/page';
@@ -25,6 +26,8 @@ export function ManageListPage() {
                     <span className="min-w-0">
                       <span className="block truncate font-semibold">{event.name}</span>
                       <span className="block text-xs text-on-surface-variant">
+                        {TH.join.codeLabel} {formatInviteCode(event.inviteCode)}
+                        {' · '}
                         {event.participantCount} คน
                       </span>
                     </span>

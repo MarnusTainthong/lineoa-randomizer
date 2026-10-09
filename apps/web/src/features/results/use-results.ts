@@ -18,6 +18,12 @@ export const useGuestResults = (eventId: string, version?: number) =>
     queryFn: () => resultsApi.guestResults(eventId, version),
   });
 
+export const useRoundRules = (eventId: string, version: number) =>
+  useQuery({
+    queryKey: ['event-data', eventId, 'round-rules', version],
+    queryFn: () => resultsApi.roundRules(eventId, version),
+  });
+
 export const useAllResults = (eventId: string, version?: number) =>
   useQuery({
     queryKey: ['event-data', eventId, 'all-results', version ?? 'current'],

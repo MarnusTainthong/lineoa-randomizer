@@ -1,10 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Rule } from '@prisma/client';
-import { DIRECTED_RULE_TYPES, EVENT_STATUS, type RuleType, type RuleView } from '@line-oa-randomizer/shared';
+import { DIRECTED_RULE_TYPES, EVENT_STATUS, isPairRule, type RuleType, type RuleView } from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FeasibilityService } from '../feasibility/feasibility.service';
+
+function ruleShapeMessage(type: RuleType, isDirected: boolean): string {
+  if (type === 'MUTUAL_EXCLUDE') return 'กติกาจับกันเองไม่ได้ต้องเลือก 2 คน';
+  if (isDirected) return 'กติกานี้ต้องเลือก 2 คน (คนจับ → คนที่ถูกจับ)';
+  return 'กติกานี้ต้องเลือกอย่างน้อย 2 คน';
+}
 
 function toRuleView(rule: Rule): RuleView {
   return { id: rule.id, type: rule.type, participantIds: rule.participantIds, note: rule.note };
@@ -90,13 +96,10 @@ export class RulesService {
   private async validateRuleShape(eventId: string, type: RuleType, participantIds: string[]): Promise<void> {
     const uniqueIds = new Set(participantIds);
     const isDirected = DIRECTED_RULE_TYPES.includes(type);
-    const hasValidSize = isDirected ? participantIds.length === 2 : participantIds.length >= 2;
+    const isPair = isPairRule(type);
+    const hasValidSize = isPair ? participantIds.length === 2 : participantIds.length >= 2;
     if (!hasValidSize || uniqueIds.size !== participantIds.length) {
-      throw new DomainError(
-        'INVALID_RULE',
-        isDirected ? 'กติกานี้ต้องเลือก 2 คน (คนจับ → คนที่ถูกจับ)' : 'กติกานี้ต้องเลือกอย่างน้อย 2 คน',
-        400,
-      );
+      throw new DomainError('INVALID_RULE', ruleShapeMessage(type, isDirected), 400);
     }
 
     const matchingCount = await this.prisma.participant.count({

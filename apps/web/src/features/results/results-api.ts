@@ -1,4 +1,4 @@
-import type { MyResult, ResultHistoryEntry, RoundResults } from '@line-oa-randomizer/shared';
+import type { MyResult, ResultHistoryEntry, RoundResults, RoundRules } from '@line-oa-randomizer/shared';
 import { apiFetch } from '../../lib/api-client';
 
 const versionQuery = (version?: number) => (version ? `?version=${version}` : '');
@@ -6,6 +6,8 @@ const versionQuery = (version?: number) => (version ? `?version=${version}` : ''
 export const resultsApi = {
   myResult: (eventId: string) => apiFetch<MyResult>(`/events/${eventId}/my-result`),
   myHistory: (eventId: string) => apiFetch<ResultHistoryEntry[]>(`/events/${eventId}/my-result/history`),
+  roundRules: (eventId: string, version: number) =>
+    apiFetch<RoundRules>(`/events/${eventId}/my-result/rounds/${version}/rules`),
   acknowledge: (eventId: string) =>
     apiFetch<void>(`/events/${eventId}/my-result/ack`, { method: 'POST' }),
   guestResults: (eventId: string, version?: number) =>

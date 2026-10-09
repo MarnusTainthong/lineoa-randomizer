@@ -46,7 +46,18 @@ export class DrawService {
       if (!drawResult.isSuccessful) throw new NoValidAssignmentError(drawResult.reason);
 
       const drawVersion = event.currentDrawVersion + 1;
-      await transaction.drawRound.create({ data: { eventId, version: drawVersion, drawnById: userId } });
+      await transaction.drawRound.create({
+        data: {
+          eventId,
+          version: drawVersion,
+          drawnById: userId,
+          ruleSnapshot: event.rules.map((rule) => ({
+            type: rule.type,
+            participantIds: rule.participantIds,
+            note: rule.note,
+          })),
+        },
+      });
       await transaction.assignment.createMany({
         data: drawResult.assignments.map((assignment) => ({
           eventId,

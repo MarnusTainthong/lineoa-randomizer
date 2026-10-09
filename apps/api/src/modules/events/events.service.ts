@@ -78,8 +78,18 @@ export class EventsService {
     const events = await this.prisma.event.findMany({
       where:
         scope === 'organized'
-          ? { organizerId: userId, status: { not: EVENT_STATUS.CLOSED } }
-          : { participants: { some: { userId } }, status: { not: EVENT_STATUS.CLOSED } },
+          ? {
+              organizerId: userId,
+              // Older closes wiped people and rounds, then hid the room. Keep those
+              // empty shells out of the list. A closed room that still has people
+              // or a draw stays, so its results can be opened.
+              OR: [
+                { status: { not: EVENT_STATUS.CLOSED } },
+                { participants: { some: {} } },
+                { drawRounds: { some: {} } },
+              ],
+            }
+          : { participants: { some: { userId } } },
       include: { participants: { select: { userId: true, lastSeenDrawVersion: true } } },
       orderBy: { createdAt: 'desc' },
     });
@@ -95,6 +105,7 @@ export class EventsService {
         exchangeDate: event.exchangeDate?.toISOString() ?? null,
         currentDrawVersion: event.currentDrawVersion,
         participantCount: event.participants.length,
+        inviteCode: event.inviteCode,
         isOrganizer,
         hasNewDraw:
           !!myParticipant &&
@@ -226,13 +237,9 @@ export class EventsService {
     return code;
   }
 
-  /** PDPA: closing a room removes everyone's personal data and every draw result. */
+  /** Closing locks edits. People, rules, and every draw round stay so results can still be opened. */
   private async closeEvent(eventId: string, userId: string): Promise<void> {
     await this.prisma.$transaction([
-      this.prisma.assignment.deleteMany({ where: { eventId } }),
-      this.prisma.drawRound.deleteMany({ where: { eventId } }),
-      this.prisma.rule.deleteMany({ where: { eventId } }),
-      this.prisma.participant.deleteMany({ where: { eventId } }),
       this.prisma.event.update({ where: { id: eventId }, data: { status: EVENT_STATUS.CLOSED } }),
       this.prisma.auditLog.create({ data: { eventId, actorId: userId, action: 'EVENT_CLOSED' } }),
     ]);

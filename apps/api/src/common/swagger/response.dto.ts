@@ -94,6 +94,9 @@ export class EventSummaryDto {
   @apiNumber(4)
   participantCount!: number;
 
+  @apiString(SWAGGER_EXAMPLE.inviteCode)
+  inviteCode!: string;
+
   @apiBoolean(true)
   isOrganizer!: boolean;
 
@@ -244,14 +247,42 @@ export class ResultHistoryEntryDto {
 
   @apiBoolean(true)
   isCurrent!: boolean;
+
+  @apiNumber(1, { nullable: true, description: 'Null when this round predates rule snapshots.' })
+  ruleCount!: number | null;
 }
 
 export class ResultRowDto {
+  @apiString(SWAGGER_EXAMPLE.participantId)
+  giverId!: string;
+
   @apiString('สมชาย')
   giverName!: string;
 
+  @apiString(SWAGGER_EXAMPLE.otherParticipantId)
+  receiverId!: string;
+
   @apiString('มาลี')
   receiverName!: string;
+}
+
+export class RoundRuleViewDto {
+  @apiString(RULE_TYPE.MUTUAL_EXCLUDE, { enum: RULE_TYPES })
+  type!: string;
+
+  @ApiProperty({ type: [String], example: ['สมชาย', 'มาลี'] })
+  participantNames!: string[];
+
+  @apiString('คู่รัก', { nullable: true })
+  note!: string | null;
+}
+
+export class RoundRulesDto {
+  @apiBoolean(true)
+  recorded!: boolean;
+
+  @ApiProperty({ type: () => [RoundRuleViewDto] })
+  rules!: RoundRuleViewDto[];
 }
 
 export class RoundResultsDto {
@@ -266,7 +297,14 @@ export class RoundResultsDto {
 
   @ApiProperty({
     type: () => [ResultRowDto],
-    example: [{ giverName: 'สมชาย', receiverName: 'มาลี' }],
+    example: [
+      {
+        giverId: SWAGGER_EXAMPLE.participantId,
+        giverName: 'สมชาย',
+        receiverId: SWAGGER_EXAMPLE.otherParticipantId,
+        receiverName: 'มาลี',
+      },
+    ],
   })
   rows!: ResultRowDto[];
 }

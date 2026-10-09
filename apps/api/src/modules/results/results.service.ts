@@ -1,10 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import type { Participant } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import type { Participant, Prisma } from '@prisma/client';
 import {
   EVENT_STATUS,
+  RULE_TYPE,
   type MyResult,
   type ResultHistoryEntry,
   type RoundResults,
+  type RoundRules,
+  type RuleType,
 } from '@line-oa-randomizer/shared';
 import { DomainError } from '../../common/domain-error';
 import { EventAccessService } from '../../common/event-access.service';
@@ -85,12 +88,37 @@ export class ResultsService {
     const drawnAtByVersion = new Map(rounds.map((round) => [round.version, round.drawnAt]));
     const receiverNameById = new Map(receivers.map((receiver) => [receiver.id, receiver.displayName]));
 
+    const snapshotByVersion = new Map(rounds.map((round) => [round.version, round.ruleSnapshot]));
+
     return assignments.map((assignment) => ({
       drawVersion: assignment.drawVersion,
       drawnAt: (drawnAtByVersion.get(assignment.drawVersion) ?? new Date(0)).toISOString(),
       receiverName: receiverNameById.get(assignment.receiverId) ?? '',
       isCurrent: assignment.drawVersion === event.currentDrawVersion,
+      ruleCount: ruleCountFromSnapshot(snapshotByVersion.get(assignment.drawVersion) ?? null),
     }));
+  }
+
+  /** Read-only rules captured when this round was drawn. */
+  async getRoundRules(eventId: string, userId: string, version: number): Promise<RoundRules> {
+    await this.eventAccess.requireMembership(eventId, userId);
+    const round = await this.prisma.drawRound.findUnique({
+      where: { eventId_version: { eventId, version } },
+    });
+    if (!round) throw new NotFoundException('ไม่มีรอบการจับสลากนี้');
+    const snapshot = readRuleSnapshot(round.ruleSnapshot);
+    if (!snapshot) return { recorded: false, rules: [] };
+
+    const participants = await this.prisma.participant.findMany({ where: { eventId } });
+    const nameById = new Map(participants.map((participant) => [participant.id, participant.displayName]));
+    return {
+      recorded: true,
+      rules: snapshot.map((rule) => ({
+        type: rule.type,
+        participantNames: rule.participantIds.map((id) => nameById.get(id) ?? '?'),
+        note: rule.note,
+      })),
+    };
   }
 
   async acknowledgeLatestDraw(eventId: string, userId: string): Promise<void> {
@@ -144,7 +172,9 @@ export class ResultsService {
     const rows = assignments
       .filter((assignment) => !onlyGiverIds || onlyGiverIds.has(assignment.giverId))
       .map((assignment) => ({
+        giverId: assignment.giverId,
         giverName: nameById.get(assignment.giverId) ?? '',
+        receiverId: assignment.receiverId,
         receiverName: nameById.get(assignment.receiverId) ?? '',
       }))
       .sort((first, second) => first.giverName.localeCompare(second.giverName, 'th'));
@@ -156,4 +186,35 @@ export class ResultsService {
       rows,
     };
   }
+}
+
+interface StoredRule {
+  type: RuleType;
+  participantIds: string[];
+  note: string | null;
+}
+
+function ruleCountFromSnapshot(snapshot: Prisma.JsonValue | null): number | null {
+  const rules = readRuleSnapshot(snapshot);
+  return rules ? rules.length : null;
+}
+
+function readRuleSnapshot(snapshot: Prisma.JsonValue | null): StoredRule[] | null {
+  if (snapshot === null) return null;
+  if (!Array.isArray(snapshot)) return null;
+  return snapshot.flatMap((entry) => {
+    const rule = toStoredRule(entry);
+    return rule ? [rule] : [];
+  });
+}
+
+function toStoredRule(value: Prisma.JsonValue): StoredRule | null {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+  const type = value.type;
+  const participantIds = value.participantIds;
+  const note = value.note;
+  if (typeof type !== 'string' || !Object.values(RULE_TYPE).includes(type as RuleType)) return null;
+  if (!Array.isArray(participantIds) || !participantIds.every((id) => typeof id === 'string')) return null;
+  if (note !== null && typeof note !== 'string') return null;
+  return { type: type as RuleType, participantIds, note };
 }

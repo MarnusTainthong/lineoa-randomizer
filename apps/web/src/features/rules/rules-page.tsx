@@ -1,6 +1,7 @@
 import {
   DIRECTED_RULE_TYPES,
   RULE_TYPE,
+  isPairRule,
   type ParticipantView,
   type RuleType,
   type RuleView,
@@ -36,6 +37,7 @@ function RuleFormDialog({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const isDirected = DIRECTED_RULE_TYPES.includes(type);
+  const isPair = isPairRule(type);
 
   const toggleParticipant = (participantId: string) =>
     setSelectedIds((current) =>
@@ -49,7 +51,7 @@ function RuleFormDialog({
     setSelectedIds([]);
   }
 
-  const canSave = isDirected ? selectedIds.length === 2 : selectedIds.length >= 2;
+  const canSave = isPair ? selectedIds.length === 2 : selectedIds.length >= 2;
 
   return (
     <Dialog
@@ -90,6 +92,9 @@ function RuleFormDialog({
             ))}
           </select>
           <span className="mt-1 block text-xs">{TH.rules.typeHelp[type]}</span>
+          {type === RULE_TYPE.MUTUAL_EXCLUDE && (
+            <span className="mt-1 block text-xs">{TH.rules.mutualLimit}</span>
+          )}
         </label>
 
         <fieldset>
@@ -106,7 +111,7 @@ function RuleFormDialog({
                       type="checkbox"
                       className="size-5 accent-primary"
                       checked={order >= 0}
-                      disabled={isDirected && order < 0 && selectedIds.length >= 2}
+                      disabled={isPair && order < 0 && selectedIds.length >= 2}
                       onChange={() => toggleParticipant(participant.id)}
                     />
                     <span className="flex-1 text-on-surface">{participant.displayName}</span>
@@ -132,11 +137,13 @@ function RuleFormDialog({
 function RuleRow({
   rule,
   nameById,
+  canEdit,
   isDeleting,
   onDelete,
 }: {
   rule: RuleView;
   nameById: Map<string, string>;
+  canEdit: boolean;
   isDeleting: boolean;
   onDelete: () => void;
 }) {
@@ -149,7 +156,9 @@ function RuleRow({
         <p className="text-sm">{names.join(isDirected ? ' → ' : ', ')}</p>
         {rule.note && <p className="text-xs text-on-surface-variant">{rule.note}</p>}
       </div>
-      <IconButton icon="delete" label={TH.common.delete} loading={isDeleting} onClick={onDelete} />
+      {canEdit && (
+        <IconButton icon="delete" label={TH.common.delete} loading={isDeleting} onClick={onDelete} />
+      )}
     </li>
   );
 }
@@ -169,9 +178,16 @@ export function RulesPage() {
           const nameById = new Map(
             event.participants.map((participant) => [participant.id, participant.displayName]),
           );
+          const canEdit = event.status !== 'CLOSED';
           return (
             <>
-              <EventStatusBlock event={event} />
+              <EventStatusBlock event={event} drawnLabel={TH.rules.drawn} />
+              <p className="flex gap-2 text-sm text-on-surface-variant">
+                <span className="material-symbols-outlined !text-[20px] text-primary" title={TH.rules.autoCheck} aria-hidden>
+                  info
+                </span>
+                <span>{TH.rules.autoCheck}</span>
+              </p>
               <QueryBoundary query={rulesQuery}>
                 {(rules) =>
                   rules.length === 0 ? (
@@ -183,6 +199,7 @@ export function RulesPage() {
                           key={rule.id}
                           rule={rule}
                           nameById={nameById}
+                          canEdit={canEdit}
                           isDeleting={deleteRule.isPending && deleteRule.variables === rule.id}
                           onDelete={() =>
                             deleteRule.mutate(rule.id, {
@@ -195,10 +212,12 @@ export function RulesPage() {
                   )
                 }
               </QueryBoundary>
-              <Button icon="add" className="w-full" onClick={() => setIsAdding(true)}>
-                {TH.rules.add}
-              </Button>
-              {isAdding && (
+              {canEdit && (
+                <Button icon="add" className="w-full" onClick={() => setIsAdding(true)}>
+                  {TH.rules.add}
+                </Button>
+              )}
+              {canEdit && isAdding && (
                 <RuleFormDialog
                   eventId={eventId}
                   participants={event.participants}

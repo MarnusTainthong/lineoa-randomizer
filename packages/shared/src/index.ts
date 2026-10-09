@@ -26,6 +26,11 @@ export const DIRECTED_RULE_TYPES: readonly RuleType[] = [
   RULE_TYPE.FORCE_ASSIGN,
 ];
 
+/** Pair rules take exactly two people. A group exclusion can take more. */
+export function isPairRule(type: RuleType): boolean {
+  return type === RULE_TYPE.MUTUAL_EXCLUDE || DIRECTED_RULE_TYPES.includes(type);
+}
+
 export interface ApiErrorBody {
   code: string;
   message: string;
@@ -53,6 +58,7 @@ export interface EventSummary {
   exchangeDate: string | null;
   currentDrawVersion: number;
   participantCount: number;
+  inviteCode: string;
   isOrganizer: boolean;
   /** True when the user has seen an earlier round and a newer one exists. */
   hasNewDraw: boolean;
@@ -111,11 +117,27 @@ export interface ResultHistoryEntry {
   drawnAt: string;
   receiverName: string;
   isCurrent: boolean;
+  /** Null when this round was drawn before rule snapshots were stored. */
+  ruleCount: number | null;
 }
 
 export interface ResultRow {
+  giverId: string;
   giverName: string;
+  receiverId: string;
   receiverName: string;
+}
+
+export interface RoundRuleView {
+  type: RuleType;
+  participantNames: string[];
+  note: string | null;
+}
+
+export interface RoundRules {
+  /** False for rounds drawn before rule snapshots were stored. */
+  recorded: boolean;
+  rules: RoundRuleView[];
 }
 
 export interface RoundResults {

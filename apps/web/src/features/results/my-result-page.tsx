@@ -1,4 +1,4 @@
-import type { MyResult } from '@line-oa-randomizer/shared';
+import type { MyResult, ResultHistoryEntry } from '@line-oa-randomizer/shared';
 import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -9,16 +9,23 @@ import { formatThaiDate } from '../../lib/utils';
 import { HistoryList } from './history-list';
 import { fireRevealConfetti } from './reveal-confetti';
 import { ResultCard } from './result-card';
+import { RoundRulesDialog } from './round-rules-dialog';
 import { SaveImageButton } from './save-image-button';
 import { useAcknowledgeDraw, useMyHistory, useMyResult } from './use-results';
 
 function MyResultContent({ result }: { result: MyResult }) {
   const [hasJustOpened, setHasJustOpened] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<ResultHistoryEntry | null>(null);
+  const [isViewingRules, setIsViewingRules] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
   const acknowledgeDraw = useAcknowledgeDraw(result.eventId);
   const isDrawn = result.receiverName !== null;
   const isOpened = hasJustOpened || result.hasOpenedCurrent;
   const historyQuery = useMyHistory(result.eventId, isDrawn && isOpened);
+  const shownVersion = selectedEntry?.drawVersion ?? result.drawVersion;
+  const shownReceiver = selectedEntry?.receiverName ?? result.receiverName ?? '';
+  const shownAt = selectedEntry?.drawnAt ?? result.drawnAt;
+  const isCurrentRound = selectedEntry?.isCurrent ?? true;
 
   function openEnvelope() {
     setHasJustOpened(true);
@@ -47,24 +54,28 @@ function MyResultContent({ result }: { result: MyResult }) {
       )}
 
       <p className="text-sm text-on-surface-variant">
-        {TH.results.current} · {TH.common.round} {result.drawVersion}
-        {result.drawnAt && ` · ${formatThaiDate(result.drawnAt, true)}`}
+        {isCurrentRound && `${TH.results.current} · `}
+        {TH.common.round} {shownVersion}
+        {shownAt && ` · ${formatThaiDate(shownAt, true)}`}
       </p>
 
       {isOpened ? (
         <>
           <ResultCard
             eventName={result.eventName}
-            receiverName={result.receiverName ?? ''}
-            drawVersion={result.drawVersion}
+            receiverName={shownReceiver}
+            drawVersion={shownVersion}
           />
           <div className="flex flex-wrap gap-2">
             <SaveImageButton
               targetRef={exportRef}
-              fileName={`line-oa-randomizer-round-${result.drawVersion}.png`}
+              fileName={`line-oa-randomizer-round-${shownVersion}.png`}
             />
+            <Button variant="outlined" icon="rule" onClick={() => setIsViewingRules(true)}>
+              {TH.results.viewRules}
+            </Button>
             {result.allowViewAllResults && (
-              <Link to={`/results/${result.eventId}/all`}>
+              <Link to={`/results/${result.eventId}/all?version=${shownVersion}`}>
                 <Button variant="outlined" icon="groups" tabIndex={-1}>
                   {TH.results.viewAll}
                 </Button>
@@ -76,12 +87,25 @@ function MyResultContent({ result }: { result: MyResult }) {
               ref={exportRef}
               variant="export"
               eventName={result.eventName}
-              receiverName={result.receiverName ?? ''}
-              drawVersion={result.drawVersion}
+              receiverName={shownReceiver}
+              drawVersion={shownVersion}
             />
           </div>
+          {isViewingRules && (
+            <RoundRulesDialog
+              eventId={result.eventId}
+              version={shownVersion}
+              onClose={() => setIsViewingRules(false)}
+            />
+          )}
           {historyQuery.isLoading && <ListSkeleton rows={2} />}
-          {historyQuery.data && <HistoryList entries={historyQuery.data} result={result} />}
+          {historyQuery.data && (
+            <HistoryList
+              entries={historyQuery.data}
+              selectedVersion={shownVersion}
+              onSelect={setSelectedEntry}
+            />
+          )}
         </>
       ) : (
         <button
@@ -93,7 +117,6 @@ function MyResultContent({ result }: { result: MyResult }) {
             mail
           </span>
           <span className="text-lg font-medium">{TH.results.openEnvelope}</span>
-          <span className="text-sm opacity-80">{result.eventName}</span>
         </button>
       )}
     </>

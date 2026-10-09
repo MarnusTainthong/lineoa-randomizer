@@ -9,7 +9,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../common/current-user.decorator';
 import { SWAGGER_EXAMPLE } from '../../common/swagger/examples';
-import { MyResultDto, ResultHistoryEntryDto, RoundResultsDto } from '../../common/swagger/response.dto';
+import { MyResultDto, ResultHistoryEntryDto, RoundResultsDto, RoundRulesDto } from '../../common/swagger/response.dto';
 import { ResultsService } from './results.service';
 
 @ApiTags('results')
@@ -30,6 +30,18 @@ export class ResultsController {
   @ApiOkResponse({ type: ResultHistoryEntryDto, isArray: true })
   getMyHistory(@CurrentUserId() userId: string, @Param('eventId') eventId: string) {
     return this.resultsService.getMyHistory(eventId, userId);
+  }
+
+  @Get('my-result/rounds/:version/rules')
+  @ApiParam({ name: 'eventId', example: SWAGGER_EXAMPLE.eventId })
+  @ApiParam({ name: 'version', example: 1 })
+  @ApiOkResponse({ type: RoundRulesDto })
+  getRoundRules(
+    @CurrentUserId() userId: string,
+    @Param('eventId') eventId: string,
+    @Param('version', ParseIntPipe) version: number,
+  ) {
+    return this.resultsService.getRoundRules(eventId, userId, version);
   }
 
   @Post('my-result/ack')

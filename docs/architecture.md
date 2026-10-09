@@ -5,7 +5,7 @@
 | Module | Responsibility |
 |---|---|
 | `auth` | Verifies the LIFF ID token with LINE, upserts the `User`, issues a JWT |
-| `events` | Room CRUD, invite preview/join, close (PDPA wipe) |
+| `events` | Room CRUD, invite preview/join, close (lock edits, keep results) |
 | `participants` | List, add guests by name, remove (before draw) |
 | `rules` | Rule CRUD (organizer only) |
 | `feasibility` | Dry-run after every participant/rule change; stores `OK / INFEASIBLE / TOO_FEW_PARTICIPANTS` |

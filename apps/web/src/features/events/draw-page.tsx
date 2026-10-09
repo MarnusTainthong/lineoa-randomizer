@@ -5,7 +5,6 @@ import { ConfirmDialog } from '../../components/ui/dialog';
 import { Page } from '../../components/ui/page';
 import { useSnackbar } from '../../components/ui/snackbar';
 import { PanelSkeleton, QueryBoundary } from '../../components/ui/states';
-import { shareTextToChat } from '../../lib/liff';
 import { TH } from '../../lib/th';
 import { FeasibilityBanner } from './feasibility-badge';
 import { useDraw, useEventDetail } from './use-events';
@@ -54,15 +53,6 @@ export function DrawPage() {
                   {TH.draw.done} ({TH.common.round} {doneVersion})
                 </p>
                 <div className="flex flex-col gap-2">
-                  <Button
-                    variant="tonal"
-                    icon="campaign"
-                    onClick={() =>
-                      void shareTextToChat(TH.manage.announceMessage).catch(() => undefined)
-                    }
-                  >
-                    {TH.manage.announce}
-                  </Button>
                   <Link to={`/results/${eventId}`}>
                     <Button variant="outlined" className="w-full" tabIndex={-1}>
                       {TH.nav.results}

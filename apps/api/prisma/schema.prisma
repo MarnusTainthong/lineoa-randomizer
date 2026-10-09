@@ -82,12 +82,14 @@ model Rule {
 }
 
 model DrawRound {
-  id        String   @id @default(uuid())
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  version   Int
-  drawnById String
-  drawnAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  version      Int
+  drawnById    String
+  drawnAt      DateTime @default(now())
+  /// Rules in force for this round. Null on rounds drawn before snapshots existed.
+  ruleSnapshot Json?
 
   @@unique([eventId, version])
 }

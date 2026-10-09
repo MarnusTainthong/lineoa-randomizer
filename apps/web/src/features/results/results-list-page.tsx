@@ -1,3 +1,4 @@
+import { formatInviteCode } from '@line-oa-randomizer/shared';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Chip } from '../../components/ui/chip';
@@ -31,14 +32,16 @@ export function ResultsListPage() {
                     <span className="min-w-0">
                       <span className="block truncate font-semibold">{event.name}</span>
                       <span className="block text-xs text-on-surface-variant">
+                        {TH.join.codeLabel} {formatInviteCode(event.inviteCode)}
+                        {' · '}
                         {event.participantCount} คน
                         {event.currentDrawVersion > 0 &&
-                          ` · ${TH.common.round} ${event.currentDrawVersion}`}
+                          ` · ${TH.manage.drawCount(event.currentDrawVersion)}`}
                       </span>
                     </span>
                     <span className="flex flex-wrap items-center gap-2">
                       <Chip tone={event.status === 'DRAWN' ? 'primary' : 'neutral'}>
-                        {TH.status[event.status]}
+                        {event.status === 'DRAWN' ? TH.results.drawn : TH.status[event.status]}
                       </Chip>
                       {event.hasNewDraw && <Chip tone="accent">{TH.results.redrawnBadge}</Chip>}
                     </span>
