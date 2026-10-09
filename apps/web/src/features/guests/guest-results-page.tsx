@@ -28,7 +28,14 @@ function GuestRow({
       <p className="font-medium">{row.giverName}</p>
       {isRevealed ? (
         <>
-          <p className="text-lg font-bold text-primary">{row.receiverName}</p>
+          <ResultCard
+            ref={exportRef}
+            eventName={event.name}
+            caption={`${row.giverName} จับได้`}
+            receiverName={row.receiverName}
+            drawVersion={drawVersion}
+            isReplaced={isReplaced}
+          />
           <div className="flex flex-wrap gap-2">
             <Button variant="text" onClick={() => setIsRevealed(false)}>
               {TH.guests.hide}
@@ -36,17 +43,6 @@ function GuestRow({
             <SaveImageButton
               targetRef={exportRef}
               fileName={`line-oa-randomizer-${row.giverName}-round-${drawVersion}.png`}
-            />
-          </div>
-          <div aria-hidden className="pointer-events-none fixed -left-[10000px] top-0">
-            <ResultCard
-              ref={exportRef}
-              variant="export"
-              eventName={event.name}
-              caption={`${row.giverName} จับได้`}
-              receiverName={row.receiverName}
-              drawVersion={drawVersion}
-              isReplaced={isReplaced}
             />
           </div>
         </>

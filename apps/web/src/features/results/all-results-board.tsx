@@ -27,19 +27,22 @@ export const AllResultsBoard = forwardRef<HTMLDivElement, AllResultsBoardProps>(
           {drawnAt && ` · ${formatThaiDate(drawnAt, true)}`}
         </p>
       </header>
-      <ol>
-        {rowsInOrder.map((row, index) => (
-          <li
-            key={row.giverId}
-            className="flex items-center gap-3 border-t border-outline-variant px-4 py-3.5 first:border-t-0"
-          >
-            <span className="w-6 shrink-0 text-sm font-medium text-on-surface-variant">{index + 1}</span>
-            <span className="min-w-0 flex-1 break-words font-semibold">{row.giverName}</span>
-            <span className="shrink-0 text-sm font-medium text-secondary">{TH.results.drew}</span>
-            <span className="min-w-0 flex-1 break-words text-right font-semibold">{row.receiverName}</span>
-          </li>
-        ))}
-      </ol>
+      <table className="w-full border-collapse text-left">
+        <tbody>
+          {rowsInOrder.map((row, index) => (
+            <tr key={row.giverId} className="border-t border-outline-variant first:border-t-0">
+              <td className="w-10 py-3.5 pl-4 align-middle text-sm font-medium text-on-surface-variant">
+                {index + 1}
+              </td>
+              <td className="break-words py-3.5 align-middle font-semibold">{row.giverName}</td>
+              <td className="whitespace-nowrap px-3 py-3.5 align-middle text-sm font-medium text-secondary">
+                {TH.results.drew}
+              </td>
+              <td className="break-words py-3.5 pr-4 text-right align-middle font-semibold">{row.receiverName}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 });

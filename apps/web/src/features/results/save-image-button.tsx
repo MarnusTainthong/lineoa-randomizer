@@ -30,7 +30,10 @@ export function SaveImageButton({
     if (!targetRef.current) return;
     setIsBusy(true);
     try {
-      const dataUrl = await toPng(targetRef.current, { pixelRatio: 2, cacheBust: true });
+      // Wait for Noto Sans Thai. cacheBust rewrites font file URLs, so the
+      // snapshot falls back to another face and Thai text sits lower than on screen.
+      await document.fonts.ready;
+      const dataUrl = await toPng(targetRef.current, { pixelRatio: 2 });
       const file = await dataUrlToFile(dataUrl, fileName);
 
       if (navigator.canShare?.({ files: [file] })) {

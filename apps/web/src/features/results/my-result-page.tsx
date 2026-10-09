@@ -62,6 +62,7 @@ function MyResultContent({ result }: { result: MyResult }) {
       {isOpened ? (
         <>
           <ResultCard
+            ref={exportRef}
             eventName={result.eventName}
             receiverName={shownReceiver}
             drawVersion={shownVersion}
@@ -81,15 +82,6 @@ function MyResultContent({ result }: { result: MyResult }) {
                 </Button>
               </Link>
             )}
-          </div>
-          <div aria-hidden className="pointer-events-none fixed -left-[10000px] top-0">
-            <ResultCard
-              ref={exportRef}
-              variant="export"
-              eventName={result.eventName}
-              receiverName={shownReceiver}
-              drawVersion={shownVersion}
-            />
           </div>
           {isViewingRules && (
             <RoundRulesDialog
